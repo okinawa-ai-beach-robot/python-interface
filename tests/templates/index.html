@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Robot Control</title>
+    <style>
+        .container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Robot Control</h1>
+        <button id="left" onmousedown="startCommand('left')" onmouseup="stopCommand()">⬅️</button>
+        <button id="forward" onmousedown="startCommand('forward')" onmouseup="stopCommand()">⬆️</button>
+        <button id="backward" onmousedown="startCommand('backward')" onmouseup="stopCommand()">⬇️</button>
+        <button id="right" onmousedown="startCommand('right')" onmouseup="stopCommand()">➡️</button>
+    </div>
+    <script>
+        var isPressed = false;
+        var intervalId;
+
+        function startCommand(direction) {
+            if (!isPressed) {
+                isPressed = true;
+                intervalId = setInterval(() => sendCommand(direction, 100), 100);
+            }
+        }
+
+        function stopCommand() {
+            isPressed = false;
+            clearInterval(intervalId);
+            sendCommand('stop', 0); // Send stop command
+        }
+
+        function sendCommand(direction, speed) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://10.42.0.1:5000/' + direction, true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.send('speed=' + speed);
+        }
+    </script>
+</body>
+</html>
