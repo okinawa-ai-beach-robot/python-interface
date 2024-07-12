@@ -1,0 +1,7 @@
+model_type: 'YOLOv5_Torch_Hub'
+model_version: 'yolov5s'
+img_heigt: 640
+img_heigt_export: 640
+img_width: 1280
+img_width_export: 1280
+nc: 80

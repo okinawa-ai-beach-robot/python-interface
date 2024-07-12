@@ -1,0 +1,7 @@
+model_type: 'SSDMobilenet_Torchvision'
+model_version: 'unused'
+img_heigt: 300
+img_heigt_export: 300
+img_width: 300
+img_width_export: 300
+#nc: 80

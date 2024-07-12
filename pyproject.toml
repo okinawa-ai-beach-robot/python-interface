@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "beachbot"
+dynamic = ["version"]
+authors = [
+    { name = "Jeffrey Queisser"},
+    { name = "Christopher Buckley"}
+]
+description = "Beachbot Template"
+readme = "README.md"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+]
+license = { text = "TBD" }
+dependencies = [
+    "numpy==1.26.4",
+    "pyserial==3.5",
+    "scipy==1.14.0",
+    "opencv-python==4.10.0.84",
+    "pyyaml==6.0.1",
+    "onnxruntime==1.18.1",
+    "matplotlib==3.9.1",
+    "fastapi==0.111.0",
+    "nicegui[highcharts]==0.9.28",
+    "torch==2.3.1",
+    "torchvision==0.18.1"
+]
+requires-python = ">=3.8.1"
+
+[project.urls]
+Source = "https://github.com/okinawa-ai-beach-robot/python-interface"
+Issues = "https://github.com/okinawa-ai-beach-robot/python-interface/issues"
+
+[tool.hatch.build.targets.sdist]
+sources = ["src"]
+
+[tool.hatch.build.targets.wheel]
+sources = ["src"]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "_version.py"
