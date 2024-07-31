@@ -5,8 +5,13 @@ import threading
 
 class VideoWriterOpenCV(threading.Thread):
     def __init__(self, filename=None, fps=10, capture_width=1920, capture_height=1080) -> None:
+        # Init superclass thread
+        super().__init__()
+        # do not block on exit:
+        self.daemon = True
+        
         if filename is None:
-            filename  = datetime.now().strftime("%Y%m%d-%H%M%S")
+            filename  = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         if "." not in filename:
             filename += ".mp4"
 
@@ -25,6 +30,7 @@ class VideoWriterOpenCV(threading.Thread):
         self.vidfile = cv2.VideoWriter(filename, fourcc, fps, (capture_width,capture_height))
         self._fps = fps
         self._videosource = None
+        self._stopped = True
 
     def add_frame(self, frame):
         _frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
@@ -47,7 +53,7 @@ class VideoWriterOpenCV(threading.Thread):
 
 
     def close(self):
-        if self._stopped:
+        if not self._stopped:
             self._stopped=True
             time.sleep(1.0/self._fps)
         self.vidfile.release()
