@@ -1,5 +1,9 @@
 # Setup of Jetson Orin Nano
-
+Allow shutdown for all users
+```
+sudo sh -c "echo '%wheel ALL= NOPASSWD: /sbin/shutdown' >> /etc/sudoers"
+sudo sh -c "echo '%wheel ALL= NOPASSWD: /usr/bin/systemctl poweroff' >> /etc/sudoers"
+```
 ## System package install
 Jetpack version used is: 5.1.2-b104
 Currently installed version can be seen by executing `scripts/beachbot_get_jetpack_version`

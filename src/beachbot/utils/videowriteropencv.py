@@ -1,7 +1,9 @@
 import cv2
 import datetime, time
 import threading
+import os
 
+from .. import get_data_path, logger
 
 class VideoWriterOpenCV(threading.Thread):
     def __init__(self, filename=None, fps=10, capture_width=1920, capture_height=1080) -> None:
@@ -11,7 +13,8 @@ class VideoWriterOpenCV(threading.Thread):
         self.daemon = True
         
         if filename is None:
-            filename  = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+            basepath = VideoWriterOpenCV.get_base_path()
+            filename  = basepath+datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         if "." not in filename:
             filename += ".mp4"
 
@@ -31,6 +34,12 @@ class VideoWriterOpenCV(threading.Thread):
         self._fps = fps
         self._videosource = None
         self._stopped = True
+
+    @staticmethod
+    def get_base_path():
+        basepath = get_data_path()+os.path.sep+"Recordings"+os.path.sep
+        os.makedirs(basepath, exist_ok=True)
+        return basepath
 
     def add_frame(self, frame):
         _frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)

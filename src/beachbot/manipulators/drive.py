@@ -193,8 +193,8 @@ class DifferentialDrive(threading.Thread):
 
 
             # Estimate motor velocity based on angluar and linear velocity and update motors if changed:
-            __motor_left_speed = bounded(self._current_velocity - 0.5 * self._current_angular_vel, -100, 100)
-            __motor_right_speed = bounded(self._current_velocity + 0.5 * self._current_angular_vel, -100, 100)
+            __motor_left_speed = bounded(self._current_velocity + 0.5 * self._current_angular_vel, -100, 100)
+            __motor_right_speed = bounded(self._current_velocity - 0.5 * self._current_angular_vel, -100, 100)
 
             # +/-15 percent no motion ... 
             __motor_left_speed = bounded(sign(__motor_left_speed)*15 + __motor_left_speed, -100, 100)
@@ -205,12 +205,10 @@ class DifferentialDrive(threading.Thread):
             if self._motor_left_speed != int(__motor_left_speed):
                 self._motor_left_speed = int(__motor_left_speed)
                 self.motor_left.change_speed(self._motor_left_speed)
-                print("Motor left", self._motor_left_speed)
 
             if self._motor_right_speed != int(__motor_right_speed):
                 self._motor_right_speed = int(__motor_right_speed)
                 self.motor_right.change_speed(self._motor_right_speed)
-                print("Motor right", self._motor_right_speed)
 
 
             t_end = time.time()
