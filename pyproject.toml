@@ -19,25 +19,22 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
 ]
 license = { text = "TBD" }
-# dependencies = [
-#     "numpy",
-#     "pyserial",
-#     "scipy",
-#     "opencv-python",
-#     "pyyaml",
-#     "onnxruntime",
-#     "matplotlib",
-#     "fastapi",
-#     "nicegui[highcharts]",
-#     "torch",
-#     "torchvision",
-#     "pydbus"
-# ]
 dependencies = [
-    "flask>=3.0.3",
-    "pydbus>=0.6.0"
+    "numpy==1.26.4",
+    "pyserial==3.5",
+    "scipy==1.14.0",
+    "opencv-python==4.10.0.84",
+    "pyyaml==6.0.1",
+    "onnxruntime==1.18.1",
+    "matplotlib==3.9.1",
+    "fastapi==0.111.0",
+    "nicegui-highcharts==1.0.1",
+    "torch==2.3.1",
+    "flask==3.0.3",
+    "pydbus==0.6.0",
+    "torchvision==0.18.1"
 ]
-requires-python = ">=3.8.1"
+requires-python = "==3.8.1"
 
 [project.urls]
 Source = "https://github.com/okinawa-ai-beach-robot/python-interface"
