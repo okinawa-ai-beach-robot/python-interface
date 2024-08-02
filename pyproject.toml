@@ -51,7 +51,6 @@ sources = ["src"]
 
 [tool.hatch.version]
 source = "vcs"
-tag-pattern = "v*.*.*"
 fallback-version= "0.0.0"
 #path = "src/beachbot/__init__.py"
 
