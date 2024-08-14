@@ -19,18 +19,23 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
 ]
 license = { text = "TBD" }
+# dependencies = [
+#     "numpy",
+#     "pyserial",
+#     "scipy",
+#     "opencv-python",
+#     "pyyaml",
+#     "onnxruntime",
+#     "matplotlib",
+#     "fastapi",
+#     "nicegui[highcharts]",
+#     "torch",
+#     "torchvision",
+#     "pydbus"
+# ]
 dependencies = [
-    "numpy==1.26.4",
-    "pyserial==3.5",
-    "scipy==1.14.0",
-    "opencv-python==4.10.0.84",
-    "pyyaml==6.0.1",
-    "onnxruntime==1.18.1",
-    "matplotlib==3.9.1",
-    "fastapi==0.111.0",
-    "nicegui[highcharts]==0.9.28",
-    "torch==2.3.1",
-    "torchvision==0.18.1"
+    "flask>=3.0.3",
+    "pydbus>=0.6.0"
 ]
 requires-python = ">=3.8.1"
 
@@ -46,6 +51,9 @@ sources = ["src"]
 
 [tool.hatch.version]
 source = "vcs"
+tag-pattern = "v*.*.*"
+fallback-version= "0.0.0"
+#path = "src/beachbot/__init__.py"
 
 [tool.hatch.build.hooks.vcs]
 version-file = "_version.py"

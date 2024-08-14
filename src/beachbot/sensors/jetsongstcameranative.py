@@ -23,11 +23,14 @@ class JetsonGstCameraNative:
         print(os.popen("v4l2-ctl --list-formats-ext").read())
 
     def read(self):
-        cuda_img = self._camera.Capture()
-        jetson_utils.cudaConvertColor(cuda_img, self.bgr_img)
-        bgr_frame = jetson_utils.cudaToNumpy(self.bgr_img)
-        jetson_utils.cudaDeviceSynchronize()
-        self._frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
+        try:
+            cuda_img = self._camera.Capture()
+            jetson_utils.cudaConvertColor(cuda_img, self.bgr_img)
+            bgr_frame = jetson_utils.cudaToNumpy(self.bgr_img)
+            jetson_utils.cudaDeviceSynchronize()
+            self._frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
+        except:
+            self._frame=None
 
         #self._frame = cudaToNumpy(cuda_img, isBGR=True)
         return self._frame

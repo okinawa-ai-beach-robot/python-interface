@@ -10,10 +10,22 @@ import signal, time
 import subprocess
 from subprocess import Popen, PIPE
 
+# from pydbus import SystemBus
+
 def is_running_by_pid(pid):
     #stat = os.system("ps -p %s &> /dev/null" % pid)
     stat = subprocess.call("ps -p %s" % pid,stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True)
     return stat == 0
+
+def shutdown():
+    print("TODO hardcoded password!!")
+    os.system("echo beachbot | sudo -S poweroff")
+    #os.system('shutdown now -h')
+    #os.system('/usr/bin/systemctl poweroff')
+    # bus = SystemBus()
+    # proxy = bus.get('org.freedesktop.login1', '/org/freedesktop/login1')
+    # if proxy.CanPowerOff() == 'yes':
+    #     proxy.PowerOff(False)  # False for 'NOT interactive'
 
 def kill_by_port(port, kill_own=False):
     process = Popen(["lsof", "-i", ":{0}".format(port)], stdout=PIPE, stderr=PIPE)
