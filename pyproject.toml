@@ -21,7 +21,7 @@ classifiers = [
 license = { text = "TBD" }
 
 # default = release
-[tool.hatch.envs.defaalt]
+[tool.hatch.envs.default]
 dependencies = [
     "numpy==1.26.4",
     "pyserial==3.5",
