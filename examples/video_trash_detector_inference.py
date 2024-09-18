@@ -3,8 +3,12 @@ import beachbot
 
 # specify path to video file
 vid_file = beachbot.get_data_path()+os.path.sep+"video_beach_test.mp4"
-# specify which modele to use
-model_file = beachbot.get_model_path()+os.path.sep+"beachbot_yolov5s_beach-cleaning-object-detection__v3-augmented_ver__2__yolov5pytorch_1280"+os.path.sep+"best.onnx"
+# specify which modele to use:
+# 1) yolo
+#model_file = beachbot.get_model_path()+os.path.sep+"beachbot_yolov5s_beach-cleaning-object-detection__v3-augmented_ver__2__yolov5pytorch_1280"+os.path.sep+"best.onnx"
+# 2) mediapipe
+model_file = beachbot.get_model_path()+os.path.sep+"mediapipetest"+os.path.sep
+
 # specify which frames of the video to analyze
 frame_numbers = [0,10,20]
 
@@ -31,7 +35,7 @@ beachbot.logger.info("Video " + vid_file + " loaded, resolution is " + str(img_w
 
 beachbot.logger.info("Load AI model")
 model_type = beachbot.ai.DerbrisDetector.get_model_type(model_file)
-beachbot.logger.info("Model type is" + str(model_type))
+beachbot.logger.info("Model type is " + str(model_type))
 
 model_cls_list= beachbot.ai.DerbrisDetector.list_models_by_type(model_type)
 beachbot.logger.info("Available model backends are " + str(model_cls_list))
