@@ -363,7 +363,7 @@ with ui.row().classes('w-full'):
         slider_th = ui.slider(min=1, max=500, value=200, on_change=lambda x: up_img(image, val=slider.value))
         ui.label().bind_text_from(slider_th, 'value', backward=lambda a: f'Confidence threshold is {a/1000.0}')
         slider_clsth = ui.slider(min=1, max=500, value=250, on_change=lambda x: up_img(image, val=slider.value))
-        ui.label().bind_text_from(slider_clsth, 'value', backward=lambda a: f'Class threshold is {a/1000.0}')
+        ui.label().bind_text_frosm(slider_clsth, 'value', backward=lambda a: f'Class threshold is {a/1000.0}')
 
 
 beachbot.utils.kill_by_port(4321)
