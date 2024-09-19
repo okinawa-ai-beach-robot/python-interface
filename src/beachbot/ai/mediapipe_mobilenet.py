@@ -95,15 +95,10 @@ class MediaPipeMobilenet(DerbrisDetector):
                 class_ids.append(self.clsmap[cls_name])
                 confidences.append(cls_score)
 
-                x = cls_box.origin_x
-                y = cls_box.origin_y
-                w = cls_box.width
-                h = cls_box.height
-
-                left = ((x - 0.5 * w) * x_factor)
-                top = ((y - 0.5 * h) * y_factor)
-                width = (w * x_factor)
-                height = (h * y_factor)
+                left = cls_box.origin_x * x_factor
+                top = cls_box.origin_y * y_factor
+                width = cls_box.width * x_factor
+                height = cls_box.height * y_factor
 
                 boxes.append(np.array([left, top, width, height]))
             
