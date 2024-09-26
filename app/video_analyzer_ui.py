@@ -367,6 +367,6 @@ with ui.row().classes('w-full'):
 
 
 beachbot.utils.kill_by_port(4321)
-ui.run(title="Beachbot Model Analyzer", port=4321)
+ui.run(title="Beachbot Model Analyzer", reload=False, port=4321)
 
 
