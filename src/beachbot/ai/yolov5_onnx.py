@@ -21,6 +21,8 @@ class Yolo5Onnx(DerbrisDetector):
         else:
             logger.info("No Gpu acceleration availabe!")
         logger.info("DL providers are:" + str(providers))
+        if not model_file.endswith(".onnx"):
+            model_file += "/best.onnx"
         self.session = onnxruntime.InferenceSession(model_file, providers=providers)
         if self.session is None:
             raise ValueError("Failed to load the model " + model_file)
