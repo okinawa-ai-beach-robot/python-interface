@@ -40,7 +40,7 @@ class Dataset():
                     if len(content)==5:
                     # classid, rect_x, rect_y rect_x2, rect_y2
                         content[0] = int(content[0])
-                        meta.append({"classid": content[0], "rect:":[content[1],content[2],content[3],content[4]]})
+                        meta.append({"classid": content[0], "rect":[content[1],content[2],content[3],content[4]]})
                 annotations.append(meta)
         return imgs, annotations
 
