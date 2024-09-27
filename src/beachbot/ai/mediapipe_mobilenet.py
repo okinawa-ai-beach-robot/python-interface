@@ -1,6 +1,5 @@
 from .. import logger
 from .debrisdetector import DerbrisDetector
-import onnxruntime
 import numpy as np
 import os
 import mediapipe as mp
@@ -10,7 +9,8 @@ import yaml
 
 class MediaPipeMobilenet(DerbrisDetector):
     _description="""
-    TODO
+    Google mediapipe implementation of SSDMobilenetV2 and related architectures.
+    Based on tflite export of model.
     """
 
     def __init__(self, model_file, use_accel=True) -> None:
@@ -33,8 +33,8 @@ class MediaPipeMobilenet(DerbrisDetector):
             print(self.clsmap)
 
         base_options = python.BaseOptions(model_asset_path=model_folder + '/model.tflite')
-        options = vision.ObjectDetectorOptions(base_options=base_options,
-                                            score_threshold=0.5)
+        #TODO optimize parameters for speedup possilbe?
+        options = vision.ObjectDetectorOptions(base_options=base_options, running_mode=vision.RunningMode.IMAGE, max_results=10, score_threshold=0.5)
         self.detector = vision.ObjectDetector.create_from_options(options)
 
     def crop_and_scale_image(self, image):
