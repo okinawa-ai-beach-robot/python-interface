@@ -26,7 +26,10 @@ class DerbrisDetector():
 
 
         if model_file is not None:
-            model_folder = os.path.dirname(os.path.realpath(model_file))
+            if "." in model_file:
+                model_folder = os.path.dirname(os.path.realpath(model_file))
+            else:
+                model_folder = os.path.realpath(model_file)
             with open(model_folder + "/export_info.yaml", 'r') as stream:
                 export_info = yaml.safe_load(stream)
                 self.img_height = export_info['img_heigt_export']

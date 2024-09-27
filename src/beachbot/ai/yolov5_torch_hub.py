@@ -15,7 +15,10 @@ class Yolo5TorchHub(DerbrisDetector):
 
     def __init__(self, model_file, use_accel=True) -> None:
         super().__init__(None)
-        model_folder = os.path.dirname(os.path.realpath(model_file))
+        if "." in model_file:
+            model_folder = os.path.dirname(os.path.realpath(model_file))
+        else:
+            model_folder = os.path.realpath(model_file)
         model_type=None
         with open(model_folder + "/export_info.yaml", 'r') as stream:
             export_info = yaml.safe_load(stream)
