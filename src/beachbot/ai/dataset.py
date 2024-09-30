@@ -38,9 +38,12 @@ class Dataset():
                 for line in lines:
                     content = [float(value) for value in line.split(' ')]
                     if len(content)==5:
-                    # classid, rect_x, rect_y rect_x2, rect_y2
+                        # Convert from YOLO format to our format:
+                        # [classid, rect_x_top_left, rect_y_top_left, rect_width, rect_height]
                         content[0] = int(content[0])
-                        meta.append({"classid": content[0], "rect":[content[1],content[2],content[3],content[4]]})
+                        x = content[1]-content[3]/2
+                        y = content[2]-content[4]/2
+                        meta.append({"classid": content[0], "rect":[x,y,content[3],content[4]]})
                 annotations.append(meta)
         return imgs, annotations
 
