@@ -12,8 +12,8 @@ import numpy as np
 from fastapi import Response
 
 from nicegui import Client, app, core, run, ui
-import ultralytics
-ultralytics.utils = ultralytics.yolo.utils
+# import ultralytics
+# ultralytics.utils = ultralytics.yolo.utils
 import beachbot
 
 import traceback 
@@ -187,12 +187,15 @@ def convert(frame: np.ndarray) -> bytes:
 
 
 
-def add_imgbox(pleft=0, ptop=0, w=0, h=0, clsstr=None):
+def add_imgbox(pleft=0, ptop=0, w=0, h=0, clsstr=None, color='#FF0000', align="start"):
     # color = 'SkyBlue'
     color = '#FF0000' 
     image.content += f'<rect x="{pleft*100}%" y="{ptop*100}%" ry="15" height="{h*100}%" width="{w*100}%" fill="none" stroke="{color}" stroke-width="4" />'
     if clsstr is not None:
-        image.content += f'<text text-anchor="start" x="{pleft*100}%" y="{ptop*100}%" stroke="{color}" font-size="2em">{clsstr}</text>'
+        if align=="start":
+            image.content += f'<text text-anchor="start" x="{pleft*100}%" y="{ptop*100}%" stroke="{color}" font-size="2em">{clsstr}</text>'
+        else:
+            image.content += f'<text text-anchor="{align}" x="{(pleft+w)*100}%" y="{(ptop+h)*100}%" stroke="{color}" font-size="2em">{clsstr}</text>'
     
 def rframe(fnum=0):
     frame_bgr = None
@@ -211,6 +214,12 @@ def rframe(fnum=0):
         with detect_timer as t:
             class_ids, confidences, boxes = ai_detect.apply_model_percent(frame, confidence_threshold=confidence_threshold, class_threshold=class_threshold)
         image.content = ""
+        rects = dataset.rects[int(fnum)]
+        im_class_nr = [r['classid'] for r in rects]
+        im_class = [dataset.classes[r['classid']] for r in rects]
+        im_roi = [r['rect'] for r in rects]
+        for r,c in zip(im_roi, im_class):
+            add_imgbox(*r,c, color="#00FF00", align="end")
         for classid, confidence, box in zip(class_ids, confidences, boxes):
             if confidence >= 0.01:
                 add_imgbox(*box, ai_detect.list_classes[classid])
