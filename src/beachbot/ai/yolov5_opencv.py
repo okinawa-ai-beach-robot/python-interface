@@ -1,4 +1,5 @@
 from .debrisdetector import DerbrisDetector
+from .yolov5_detector import Yolo5Detector
 import cv2
 import numpy as np
 
@@ -7,7 +8,7 @@ from os import listdir
 from os.path import isfile, join
 import yaml
 
-class Yolo5OpenCV(DerbrisDetector):
+class Yolo5OpenCV(Yolo5Detector):
     _description="""
     YOLOv5 implementation based on OpenCV framework.\n
     Supports hardware acceleration via CUDA if available on platform.
@@ -39,7 +40,6 @@ class Yolo5OpenCV(DerbrisDetector):
             self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
             self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
-        #input_type = self.session.get_inputs()[0].type
         self.img_width = img_width
         self.img_height = img_height
         # if "float16" in input_type:
@@ -48,46 +48,17 @@ class Yolo5OpenCV(DerbrisDetector):
         #     self.dtype=np.float32
 
 
-    def apply_model(self, inputs, confidence_threshold=0.2, class_threshold=0.25):  
-        row, col, _ = inputs.shape
+    def apply_model(self, inputs, confidence_threshold=0.2, units_percent=True):  
+        img = self._crop_and_scale_image(inputs)
+        row, col, _ = img.shape
         _max = max(col, row)
         result = np.zeros((_max, _max, 3), np.uint8)
-        result[0:row, 0:col] = inputs
-        scale = 1.0/255.0 # convert byte color 0-255 to float value range 0-1
-        blob = cv2.dnn.blobFromImage(result, scalefactor=scale, size=(self.img_width,self.img_height), mean=(0,0,0), swapRB=False, crop=False)
-        self.net.setInput(blob)
-
-        prediction = self.net.forward()
-        #image was made into square image, here, rescale the box positions and sizes to fit input dimension?
-        for rown in range(prediction.shape[1]):
-            rx = prediction[0][rown][0]
-            ry = prediction[0][rown][1]
-            rw = prediction[0][rown][2]
-            rh = prediction[0][rown][3]
-
-            rxn = (_max/col)*rx
-            ryn = (_max/row)*ry
-            rwn = (_max/col)*rw
-            rhn = (_max/row)*rh
-
-            prediction[0][rown][0] = rxn
-            prediction[0][rown][1] = ryn
-            prediction[0][rown][2] = rwn
-            prediction[0][rown][3] = rhn
-
-        return self.wrap_detection(prediction[0], confidence_threshold=confidence_threshold, class_threshold=class_threshold)
-    
-    def apply_model_percent(self, inputs, confidence_threshold=0.2, class_threshold=0.25):  
-        row, col, _ = inputs.shape
-        _max = max(col, row)
-        result = np.zeros((_max, _max, 3), np.uint8)
-        result[0:row, 0:col] = inputs
+        result[0:row, 0:col] = img
         scale = 1.0/255.0 # convert byte color 0-255 to float value range 0-1
         blob = cv2.dnn.blobFromImage(result, scalefactor=scale, size=(self.img_width,self.img_height), mean=(0,0,0), swapRB=False, crop=False) #swapRB: RGB<->BGR conversion!
         self.net.setInput(blob)
 
         prediction = self.net.forward()
-
         #image was made into square image, here, rescale the box positions and sizes to fit input dimension?
         for rown in range(prediction.shape[1]):
             rx = prediction[0][rown][0]
@@ -105,8 +76,9 @@ class Yolo5OpenCV(DerbrisDetector):
             prediction[0][rown][2] = rwn
             prediction[0][rown][3] = rhn
 
-
-
-        return self.wrap_detection_percent(prediction[0], confidence_threshold=confidence_threshold, class_threshold=class_threshold)
+        result_class_ids, result_confidences, result_boxes = self._wrap_detection(prediction[0], confidence_threshold=confidence_threshold)
+        self._map_resuts_to_input_image(result_boxes, inputs, units_percent=units_percent)
+        return result_class_ids, result_confidences, result_boxes
     
+
 DerbrisDetector.add_model("YOLOv5", Yolo5OpenCV)

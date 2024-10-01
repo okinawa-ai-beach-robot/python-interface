@@ -62,7 +62,7 @@ try:
 
 
 
-        def apply_model(self, inputs, confidence_threshold=0.2, class_threshold=0.25):  
+        def apply_model(self, inputs, confidence_threshold=0.2, units_percent=True):  
             #self.net.conf = confidence_threshold  # NMS confidence threshold
             row, col, _ = inputs.shape
             inputs = np.swapaxes(np.swapaxes(inputs, 0, -1), -2, -1)[None, :, :, :] / 255.0
@@ -78,45 +78,30 @@ try:
             result_boxes = []
 
             for i in range(res.shape[0]):
-                result_class_ids.append(int(res[i,5]))
-                result_confidences.append(res[i,4])
-                left = res[i,0]
-                top = res[i,1]
-                width = res[i,2]-res[i,0]
-                height = res[i,3]-res[i,1]
-                bbox = np.array([left, top, width, height])
-                result_boxes.append(bbox)
-
-            return result_class_ids, result_confidences, result_boxes
-        
-        def apply_model_percent(self, inputs, confidence_threshold=0.2, class_threshold=0.25):  
-            #self.net.conf = confidence_threshold  # NMS confidence threshold
-            row, col, _ = inputs.shape
-            inputs = np.swapaxes(np.swapaxes(inputs, 0, -1), -2, -1)[:, :, :] / 255.0
-            if inputs.dtype != self.dtype:
-                inputs = inputs.astype(self.dtype)
-            with torch.no_grad():
-                results = self.net([torch.tensor(inputs)])
-
-            res_boxes =  results[0]['boxes']
-            res_scores =  results[0]['scores']
-            res_labels =  results[0]['labels']
-            result_class_ids = []
-            result_confidences = []
-            result_boxes = []
-
-            for box,score,cls in zip(res_boxes, res_scores, res_labels):
-                if score>confidence_threshold:
-                    result_class_ids.append(int(cls))
-                    result_confidences.append(float(score))
-                    left = box[0]/self.img_width
-                    top = box[1]/self.img_height
-                    width = (box[2]-box[0])/self.img_width
-                    height = (box[3]-box[1])/self.img_height
-                    bbox = np.array([float(left), float(top), float(width), float(height)])
+                if res[i,4]>confidence_threshold:
+                    result_class_ids.append(int(res[i,5]))
+                    result_confidences.append(res[i,4])
+                    left = res[i,0]
+                    top = res[i,1]
+                    width = res[i,2]-res[i,0]
+                    height = res[i,3]-res[i,1]
+                    if units_percent:
+                        # percent estimate, relative to image size
+                        left /= inputs.shape[1]
+                        top /= inputs.shape[0]
+                        width /= inputs.shape[1]
+                        height /= inputs.shape[0]
+                    else:
+                        # pixel coordinates, rond float estimates
+                        left = round(left)
+                        top = round(top)
+                        width = round(width)
+                        height = round(height)
+                    bbox = np.array([left, top, width, height])
                     result_boxes.append(bbox)
 
             return result_class_ids, result_confidences, result_boxes
+        
         
     DerbrisDetector.add_model("SSDMobilenet_Torchvision", SSDMobileNetTorchvision)
 

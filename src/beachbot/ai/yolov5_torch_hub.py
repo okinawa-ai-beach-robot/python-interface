@@ -1,5 +1,6 @@
 from .. import logger
 from .debrisdetector import DerbrisDetector
+from .yolov5_detector import Yolo5Detector
 import torch
 import numpy as np
 
@@ -9,7 +10,7 @@ from os.path import isfile, join
 import yaml
 
 try:
-    class Yolo5TorchHub(DerbrisDetector):
+    class Yolo5TorchHub(Yolo5Detector):
         _description="""
         Official YOLOv5 implementation based on Pytorch and torch Hub.\n
         """
@@ -67,7 +68,7 @@ try:
 
 
 
-        def apply_model(self, inputs, confidence_threshold=0.2, class_threshold=0.25):  
+        def apply_model(self, inputs, confidence_threshold=0.2, units_percent=True):  
             self.net.conf = confidence_threshold  # NMS confidence threshold
             row, col, _ = inputs.shape
             with torch.no_grad():
@@ -85,29 +86,23 @@ try:
                 top = res[i,1]
                 width = res[i,2]-res[i,0]
                 height = res[i,3]-res[i,1]
-                bbox = np.array([left, top, width, height])
-                result_boxes.append(bbox)
-
-            return result_class_ids, result_confidences, result_boxes
-        
-        def apply_model_percent(self, inputs, confidence_threshold=0.2, class_threshold=0.25):  
-            self.net.conf = confidence_threshold  # NMS confidence threshold
-            row, col, _ = inputs.shape
-            with torch.no_grad():
-                results = self.net([inputs], size=row)
-
-            res =  results.xyxy[0]
-            result_class_ids = []
-            result_confidences = []
-            result_boxes = []
-
-            for i in range(res.shape[0]):
-                result_class_ids.append(int(res[i,5]))
-                result_confidences.append(res[i,4])
-                left = res[i,0]/self.img_width
-                top = res[i,1]/self.img_height
-                width = (res[i,2]-res[i,0])/self.img_width
-                height = (res[i,3]-res[i,1])/self.img_height
+                if units_percent:
+                    left /= self.img_width
+                    top /= self.img_height
+                    width /= self.img_width
+                    height /= self.img_height
+                    if units_percent:
+                        # percent estimate, relative to image size
+                        left /= inputs.shape[1]
+                        top /= inputs.shape[0]
+                        width /= inputs.shape[1]
+                        height /= inputs.shape[0]
+                    else:
+                        # pixel coordinates, rond float estimates
+                        left = round(left)
+                        top = round(top)
+                        width = round(width)
+                        height = round(height)
                 bbox = np.array([left, top, width, height])
                 result_boxes.append(bbox)
 

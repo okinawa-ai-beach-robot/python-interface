@@ -55,10 +55,8 @@ print("Image size is", str(img_width)+"x"+str(img_height))
 
 
 print("Load AI model")
-class_threshold=0.25
 confidence_threshold=0.2
-frame = ai_detect.crop_and_scale_image(frame)
-class_ids, confidences, boxes = ai_detect.apply_model_percent(frame, confidence_threshold=confidence_threshold, class_threshold=class_threshold)
+class_ids, confidences, boxes = ai_detect.apply_model(frame, confidence_threshold=confidence_threshold)
 print("[ result is: ", [class_ids, confidences, boxes], "]")
 
 print("Prepare server ...")
@@ -160,13 +158,10 @@ def rframe(fnum=0):
         with read_timer as t:
             frame_bgr=cv2.imread(dataset.images[int(fnum)])
             frame = frame_bgr[..., ::-1]  # OpenCV image (BGR to RGB)
-        with preprocess_timer as t:
-            frame = ai_detect.crop_and_scale_image(frame)
         confidence_threshold = slider_th.value/1000.0
-        class_threshold = slider_clsth.value/1000.0
-        print("Detect with", confidence_threshold, "and", class_threshold)
+        print("Detect with", confidence_threshold)
         with detect_timer as t:
-            class_ids, confidences, boxes = ai_detect.apply_model_percent(frame, confidence_threshold=confidence_threshold, class_threshold=class_threshold)
+            class_ids, confidences, boxes = ai_detect.apply_model(frame, confidence_threshold=confidence_threshold)
         image.content = ""
         rects = dataset.rects[int(fnum)]
         im_class_nr = [r['classid'] for r in rects]
@@ -323,10 +318,8 @@ with ui.row().classes('w-full'):
         image = ui.interactive_image(source="file/frame?fnum=0",size=(img_width,img_height)).style('width: 100%')
         slider = ui.slider(min=0, max=len(dataset.images)-1, value=0, on_change=lambda x: up_img(image, val=x.value))
         sliderlabel=ui.label().bind_text_from(slider, 'value', backward=lambda a: f'Frame {a} of {len(dataset.images)}')
-        slider_th = ui.slider(min=1, max=500, value=200, on_change=lambda x: up_img(image, val=slider.value))
+        slider_th = ui.slider(min=1, max=1000, value=200, on_change=lambda x: up_img(image, val=slider.value))
         ui.label().bind_text_from(slider_th, 'value', backward=lambda a: f'Confidence threshold is {a/1000.0}')
-        slider_clsth = ui.slider(min=1, max=500, value=250, on_change=lambda x: up_img(image, val=slider.value))
-        ui.label().bind_text_from(slider_clsth, 'value', backward=lambda a: f'Class threshold is {a/1000.0}')
 
 
 beachbot.utils.kill_by_port(4321)
