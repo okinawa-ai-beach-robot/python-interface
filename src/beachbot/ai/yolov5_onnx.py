@@ -1,9 +1,10 @@
 from .. import logger
 from .debrisdetector import DerbrisDetector
+from .yolov5_detector import Yolo5Detector
 import onnxruntime
 import numpy as np
 
-class Yolo5Onnx(DerbrisDetector):
+class Yolo5Onnx(Yolo5Detector):
     _description="""
     YOLOv5 implementation based on ONNXruntime framework.\n
     Supports hardware acceleration via CUDA if available on platform.\n
@@ -36,20 +37,16 @@ class Yolo5Onnx(DerbrisDetector):
         elif "float32" in input_type or "float" in input_type:
             self.dtype=np.float32
 
-    def apply_model(self, inputs, confidence_threshold=0.2, class_threshold=0.25):  
-        inputs = np.swapaxes(np.swapaxes(inputs, 0, -1), -2, -1)[None, :, :, :] / 255.0
-        if inputs.dtype != self.dtype:
-            inputs = inputs.astype(self.dtype)
-        prediction = self.session.run(None, {"images": inputs})
-        return self.wrap_detection(prediction[0][0], confidence_threshold=confidence_threshold, class_threshold=class_threshold)
+    def apply_model(self, inputs, confidence_threshold=0.2, units_percent=True):  
+        img = self._crop_and_scale_image(inputs)
+        img = np.swapaxes(np.swapaxes(img, 0, -1), -2, -1)[None, :, :, :] / 255.0
+        if img.dtype != self.dtype:
+            img = img.astype(self.dtype)
+        prediction = self.session.run(None, {"images": img})
 
-    def apply_model_percent(self, inputs, confidence_threshold=0.2, class_threshold=0.25):  
-        inputs = np.swapaxes(np.swapaxes(inputs, 0, -1), -2, -1)[None, :, :, :] / 255.0
-        if inputs.dtype != self.dtype:
-            inputs = inputs.astype(self.dtype)
-            
-        prediction = self.session.run(None, {"images": inputs})
-        return self.wrap_detection_percent(prediction[0][0], confidence_threshold=confidence_threshold, class_threshold=class_threshold)
+        result_class_ids, result_confidences, result_boxes = self._wrap_detection(prediction[0][0], confidence_threshold=confidence_threshold)
+        self._map_resuts_to_input_image(result_boxes, inputs, units_percent=units_percent)
+        return result_class_ids, result_confidences, result_boxes
 
 
 DerbrisDetector.add_model("YOLOv5", Yolo5Onnx)

@@ -2,7 +2,7 @@ import sys, os, cv2
 import beachbot
 
 # specify path to video file
-vid_file = beachbot.get_data_path()+os.path.sep+"video_beach_test.mp4"
+vid_file = beachbot.get_data_path()+os.path.sep+"Recordings/20240801-110112.mp4"
 # specify which modele to use:
 # 1) yolo
 #model_file = beachbot.get_model_path()+os.path.sep+"beachbot_yolov5s_beach-cleaning-object-detection__v3-augmented_ver__2__yolov5pytorch_1280"+os.path.sep+"best.onnx"
@@ -10,7 +10,7 @@ vid_file = beachbot.get_data_path()+os.path.sep+"video_beach_test.mp4"
 model_file = beachbot.get_model_path()+os.path.sep+"mediapipetest"+os.path.sep
 
 # specify which frames of the video to analyze
-frame_numbers = [0,10,20]
+frame_numbers = [0,10,20,50,100]
 
 # Open openCV video device
 video_capture = cv2.VideoCapture(vid_file)
@@ -43,13 +43,10 @@ beachbot.logger.info("Here we will take the first one: " + str(model_cls_list[0]
 
 # Instantiate ai model class
 ai_detect = model_cls_list[0](model_file=model_file, use_accel=True)
-class_threshold=0.25
 confidence_threshold=0.2
 # Perform one inital evaluation to initialize the model
-# First: preprocess frame to fir model data format:
-frame = ai_detect.crop_and_scale_image(frame)
 # Second: apply model, ignore results, as this is just one inital dummy execution of the model to initialze internal buffers etc
-class_ids, confidences, boxes = ai_detect.apply_model_percent(frame, confidence_threshold=confidence_threshold, class_threshold=class_threshold)
+class_ids, confidences, boxes = ai_detect.apply_model(frame, confidence_threshold=confidence_threshold, units_percent=False)
 beachbot.logger.info("Done loading AI model")
 
 
@@ -62,10 +59,8 @@ for f_num in frame_numbers:
     succ, frame_bgr = video_capture.read()
     # OpenCV image (BGR to RGB)
     frame = frame_bgr[..., ::-1]  
-    # Process input image to fit requested format of AI model
-    frame = ai_detect.crop_and_scale_image(frame)
     # Apply model
-    class_ids, confidences, boxes = ai_detect.apply_model_percent(frame, confidence_threshold=confidence_threshold, class_threshold=class_threshold)
+    class_ids, confidences, boxes = ai_detect.apply_model(frame, confidence_threshold=confidence_threshold, units_percent=False)
     # Print detected objects (boxes, id and confidence)
     for classid, confidence, box in zip(class_ids, confidences, boxes):
         if confidence >= 0.01:

@@ -37,13 +37,11 @@ class MediaPipeMobilenet(DerbrisDetector):
         options = vision.ObjectDetectorOptions(base_options=base_options, running_mode=vision.RunningMode.IMAGE, max_results=10, score_threshold=0.5)
         self.detector = vision.ObjectDetector.create_from_options(options)
 
-    def crop_and_scale_image(self, image):
-        return image
 
     
 
 
-    def apply_model(self, inputs, confidence_threshold=0.2, class_threshold=0.25):  
+    def apply_model(self, inputs, confidence_threshold=0.2, units_percent=True):  
         inimg = mp.Image(image_format=mp.ImageFormat.SRGB, data=np.array(inputs))
         detection_result = self.detector.detect(inimg)
 
@@ -66,42 +64,21 @@ class MediaPipeMobilenet(DerbrisDetector):
                 top = cls_box.origin_y
                 width = cls_box.width
                 height = cls_box.height
+                if units_percent:
+                    # percent estimate, relative to image size
+                    left /= inputs.shape[1]
+                    top /= inputs.shape[0]
+                    width /= inputs.shape[1]
+                    height /= inputs.shape[0]
+                else:
+                    # pixel coordinates, rond float estimates
+                    left = round(left)
+                    top = round(top)
+                    width = round(width)
+                    height = round(height)
 
                 boxes.append(np.array([left, top, width, height]))
                 
-        return class_ids, confidences, boxes
-
-
-
-    def apply_model_percent(self, inputs, confidence_threshold=0.2, class_threshold=0.25):  
-        x_factor = 1/inputs.shape[1]
-        y_factor = 1/inputs.shape[0]
-
-
-        inimg = mp.Image(image_format=mp.ImageFormat.SRGB, data=np.array(inputs))
-        detection_result = self.detector.detect(inimg)
-
-        class_ids = []
-        confidences = []
-        boxes = []
-
-        for box in detection_result.detections:
-            cate = box.categories[0] #TODO only assume one category for now
-            cls_name = cate.category_name
-            cls_score = cate.score
-            cls_box = box.bounding_box
-
-            if cls_score >= confidence_threshold:
-                class_ids.append(self.clsmap[cls_name])
-                confidences.append(cls_score)
-
-                left = cls_box.origin_x * x_factor
-                top = cls_box.origin_y * y_factor
-                width = cls_box.width * x_factor
-                height = cls_box.height * y_factor
-
-                boxes.append(np.array([left, top, width, height]))
-            
         return class_ids, confidences, boxes
 
 
