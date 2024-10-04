@@ -1,5 +1,6 @@
 import os
 import yaml
+import random
 
 from .. import get_dataset_path, logger
 
@@ -18,6 +19,16 @@ class Dataset():
                 logger.info("Dataset defines " + str(num_classes) + " classes -> " +  str(self.classes))
                 assert len(self.classes)!=num_classes, "Error: Dataset inconsistent, number of classes does not match number of labels"
                 self.images, self.rects = Dataset._load_img_list(datasetpath + os.path.sep + subtype)
+
+    def random_prune(self, num_samples):
+        sel = list(range(len(self.images)))
+        random.shuffle(sel)
+        sel = sel[:num_samples]
+        ndata = Dataset()
+        ndata.classes = self.classes
+        ndata.images = [self.images[i] for i in sel]
+        ndata.rects = [self.rects[i] for i in sel]
+        return ndata
 
     def list_dataset_paths():
         base_path=get_dataset_path()
