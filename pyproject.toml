@@ -20,8 +20,6 @@ classifiers = [
 ]
 license = { text = "TBD" }
 
-# default = release
-[tool.hatch.envs.default]
 dependencies = [
     "numpy==1.26.4",
     "pyserial==3.5",
@@ -39,26 +37,22 @@ dependencies = [
     "torchvision==0.18.1"
 ]
 
-[tool.hatch.envs.jetson]
-dependencies = [
+requires-python = ">=3.8, <3.11"
+
+[dependency-groups]
+jetson = [
     "numpy==1.26.4",
     "pyserial==3.5",
     "scipy==1.14.0",
-    #"opencv-python==4.10.0.84",
     "pyyaml==6.0.1",
-    #"onnxruntime==1.18.1",
     "matplotlib==3.9.1",
     "fastapi>=0.109.1,<0.110.0", # https://github.com/zauberzeug/nicegui/security/dependabot/27
     "nicegui==1.4.26",
     "nicegui-highcharts==1.0.1",
-    #"torch==2.3.1",
     "flask==3.0.3",
     "pydbus==0.6.0",
-    #"torchvision==0.18.1"
 ]
-
-[tool.hatch.envs.dev]
-dependencies = [
+dev = [
     "numpy>=1.26.4",
     "pyserial>=3.5",
     "scipy>=1.14.0",
@@ -74,8 +68,6 @@ dependencies = [
     "pydbus>=0.6.0",
     "torchvision>=0.18.1"
 ]
-
-requires-python = ">=3.8, <3.11"
 
 [project.urls]
 Source = "https://github.com/okinawa-ai-beach-robot/python-interface"
