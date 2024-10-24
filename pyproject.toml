@@ -21,13 +21,13 @@ classifiers = [
 license = { text = "TBD" }
 
 dependencies = [
-    "numpy==1.26.4",
+    "numpy==1.24.4",
     "pyserial==3.5",
-    "scipy==1.14.0",
+    "scipy==1.10.1",
     "opencv-python==4.10.0.84",
     "pyyaml==6.0.1",
     "onnxruntime==1.18.1",
-    "matplotlib==3.9.1",
+    "matplotlib==3.7.5",
     "fastapi>=0.109.1,<0.110.0", # https://github.com/zauberzeug/nicegui/security/dependabot/27
     "nicegui==1.4.26",
     "nicegui-highcharts==1.0.1",
@@ -41,11 +41,11 @@ requires-python = ">=3.8, <3.11"
 
 [dependency-groups]
 jetson = [
-    "numpy==1.26.4",
+    "numpy==1.24.4",
     "pyserial==3.5",
-    "scipy==1.14.0",
+    "scipy==1.10.1",
     "pyyaml==6.0.1",
-    "matplotlib==3.9.1",
+    "matplotlib==3.7.5",
     "fastapi>=0.109.1,<0.110.0", # https://github.com/zauberzeug/nicegui/security/dependabot/27
     "nicegui==1.4.26",
     "nicegui-highcharts==1.0.1",
@@ -53,13 +53,13 @@ jetson = [
     "pydbus==0.6.0",
 ]
 dev = [
-    "numpy>=1.26.4",
+    "numpy>=1.24.4",
     "pyserial>=3.5",
-    "scipy>=1.14.0",
+    "scipy>=1.10.1",
     "opencv-python>=4.10.0.84",
     "pyyaml>=6.0.1",
     "onnxruntime>=1.18.1",
-    "matplotlib>=3.9.1",
+    "matplotlib>=3.7.5",
     "fastapi>=0.109.1,<0.110.0", # https://github.com/zauberzeug/nicegui/security/dependabot/27
     "nicegui>=1.4.26",
     "nicegui-highcharts>=1.0.1",
