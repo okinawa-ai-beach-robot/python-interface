@@ -17,6 +17,7 @@ def sign(x):
     return (x > 0) - (x < 0)
 
 
+
 def bounded(val, mi=0, ma=1):
     return min(ma, max(val, mi))
 
@@ -152,14 +153,25 @@ class DifferentialDrive(threading.Thread):
         self.motor_right = motor_right
         self.update_freq = update_freq
         self._is_running = False
+        self.motor_left = motor_left
+        self.motor_right = motor_right
+        self.update_freq = update_freq
+        self._is_running = False
 
+        self._target_angular_vel = 0
+        self._target_velocity = 0
+        self._current_angular_vel = 0
+        self._current_velocity = 0
         self._target_angular_vel = 0
         self._target_velocity = 0
         self._current_angular_vel = 0
         self._current_velocity = 0
 
         self._max_rate_of_change = 100
+        self._max_rate_of_change = 100
 
+        self._motor_left_speed = 0
+        self._motor_right_speed = 0
         self._motor_left_speed = 0
         self._motor_right_speed = 0
 
@@ -169,6 +181,8 @@ class DifferentialDrive(threading.Thread):
         super().start()
 
     def cleanup(self):
+        self._is_running = False
+        time.sleep(1.0 / self.update_freq)
         self._is_running = False
         time.sleep(1.0 / self.update_freq)
 
@@ -191,7 +205,19 @@ class DifferentialDrive(threading.Thread):
             vel_dot = vel_dir * min(
                 self._max_rate_of_change / self.update_freq, abs(vel_delta)
             )
+            dir_dot = dir_dir * min(
+                self._max_rate_of_change / self.update_freq, abs(dir_delta)
+            )
+            vel_dot = vel_dir * min(
+                self._max_rate_of_change / self.update_freq, abs(vel_delta)
+            )
 
+            self._current_angular_vel = bounded(
+                self._current_angular_vel + dir_dot, -100, 100
+            )
+            self._current_velocity = bounded(
+                self._current_velocity + vel_dot, -100, 100
+            )
             self._current_angular_vel = bounded(
                 self._current_angular_vel + dir_dot, -100, 100
             )
@@ -206,7 +232,20 @@ class DifferentialDrive(threading.Thread):
             __motor_right_speed = bounded(
                 self._current_velocity - 0.5 * self._current_angular_vel, -100, 100
             )
+            __motor_left_speed = bounded(
+                self._current_velocity + 0.5 * self._current_angular_vel, -100, 100
+            )
+            __motor_right_speed = bounded(
+                self._current_velocity - 0.5 * self._current_angular_vel, -100, 100
+            )
 
+            # +/-15 percent no motion ...
+            __motor_left_speed = bounded(
+                sign(__motor_left_speed) * 15 + __motor_left_speed, -100, 100
+            )
+            __motor_right_speed = bounded(
+                sign(__motor_right_speed) * 15 + __motor_right_speed, -100, 100
+            )
             # +/-15 percent no motion ...
             __motor_left_speed = bounded(
                 sign(__motor_left_speed) * 15 + __motor_left_speed, -100, 100
@@ -226,7 +265,10 @@ class DifferentialDrive(threading.Thread):
             t_end = time.time()
             t_wait = (1.0 / self.update_freq) - (t_end - t_start)
             if t_wait > 0:
+            t_wait = (1.0 / self.update_freq) - (t_end - t_start)
+            if t_wait > 0:
                 time.sleep(t_wait)
+        # Cleanup, end control loop, stop motors :)
         # Cleanup, end control loop, stop motors :)
         self.motor_left.change_speed(0)
         self.motor_right.change_speed(0)
@@ -234,3 +276,44 @@ class DifferentialDrive(threading.Thread):
     def set_target(self, angular_vel, velocity):
         self._target_angular_vel = angular_vel
         self._target_velocity = velocity
+
+
+class PIDController:
+    def __init__(
+        self, kp: float, ki: float, kd: float, setpoint_x: float, setpoint_y: float
+    ):
+        self.kp = kp
+        # self.ki = ki
+        # self.kd = kd
+        self.setpoint_x = setpoint_x
+        self.setpoint_y = setpoint_y
+        # self.prev_error_x = 0
+        # self.prev_error_y = 0
+        # self.integral_x = 0
+        # self.integral_y = 0
+
+    def get_output(self, x: float, y: float) -> Tuple[int, int]:
+        error_x = self.setpoint_x - x
+        error_y = self.setpoint_y - y
+
+        # self.integral_x += error_x
+        # self.integral_y += error_y
+
+        # derivative_x = error_x - self.prev_error_x
+        # derivative_y = error_y - self.prev_error_y
+
+        output_x = (
+            self.kp * error_x
+        )  # + self.ki * self.integral_x + self.kd * derivative_x
+        output_y = (
+            self.kp * error_y
+        )  # + self.ki * self.integral_y + self.kd * derivative_y
+
+        # self.prev_error_x = error_x
+        # self.prev_error_y = error_y
+
+        # Truncate output to -100 to 100
+        output_x = max(min(output_x, 100), -100)
+        output_y = max(min(output_y, 100), -100)
+
+        return int(output_x), int(output_y)
