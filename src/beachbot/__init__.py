@@ -1,22 +1,19 @@
-#   -------------------------------------------------------------
-#   Copyright (c) Microsoft Corporation. All rights reserved.
-#   Licensed under the MIT License. See LICENSE in project root for information.
-#   -------------------------------------------------------------
-"""Python Package Template"""
 from __future__ import annotations
 from importlib.metadata import version as _version, PackageNotFoundError
 import logging
-import os, sys
-
+import os
+import sys
+from . import manipulators
+from . import sensors
+from . import ai
+from . import utils
 
 try:
     __version__ = _version(__name__)
 except PackageNotFoundError:
     __version__ = "0.0.0"
 
-
-__all__ = ["manipulators", "sensors", "ai"]  # "sensors", "platforms"
-
+__all__ = ["manipulators", "sensors", "ai", "utils"]  # "sensors", "platforms"
 
 def get_base_path():
     if "BEACHBOT_HOME" in os.environ:
@@ -28,7 +25,6 @@ def get_base_path():
         )
         return os.environ["HOME"]
 
-
 def get_model_path():
     return get_base_path() + os.path.sep + "Models"
 
@@ -39,10 +35,3 @@ def get_dataset_path():
 
 def get_data_path():
     return get_base_path() + os.path.sep + "Data"
-
-
-from . import manipulators
-from . import sensors
-from . import ai
-
-from . import utils
