@@ -34,7 +34,8 @@ dependencies = [
     "torch==2.3.1",
     "flask==3.0.3",
     "pydbus==0.6.0",
-    "torchvision==0.18.1"
+    "torchvision==0.18.1",
+    "platformdirs==4.3.6"
 ]
 
 requires-python = ">=3.8, <3.11"
@@ -51,6 +52,7 @@ jetson = [
     "nicegui-highcharts==1.0.1",
     "flask==3.0.3",
     "pydbus==0.6.0",
+    "platformdirs==4.3.6"
 ]
 dev = [
     "numpy>=1.24.4",
@@ -66,7 +68,8 @@ dev = [
     "torch>=2.3.1",
     "flask>=3.0.3",
     "pydbus>=0.6.0",
-    "torchvision>=0.18.1"
+    "torchvision>=0.18.1",
+    "platformdirs>=4.3.6"
 ]
 
 [project.urls]
