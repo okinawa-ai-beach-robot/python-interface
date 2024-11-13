@@ -1,4 +1,4 @@
-from .. import logger
+from beachbot.config import logger
 from .debrisdetector import DerbrisDetector
 import torch
 
