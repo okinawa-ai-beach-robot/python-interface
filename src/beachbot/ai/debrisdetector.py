@@ -1,8 +1,8 @@
 import os
-import yaml
+)import yam2
 
 
-from .. import get_model_path, logger
+from beachbot.config import config, logger
 
 
 class DerbrisDetector:
@@ -58,7 +58,7 @@ class DerbrisDetector:
         raise NotImplementedError
 
     @staticmethod
-    def draw_boxes(class_ids, confidences, boxes, image, config):
+    def draw_boxes(class_ids, confidences, boxes, image, box_config):
         colors = [
             (255, 255, 0),
             (0, 255, 0),
@@ -72,7 +72,7 @@ class DerbrisDetector:
             (255, 0, 0),
         ]
         for classid, confidence, box in zip(class_ids, confidences, boxes):
-            if confidence >= config:
+            if confidence >= box_config:
                 color = colors[int(classid) % len(colors)]
                 cv.rectangle(image, box, color, 2)
         img2 = image[:, :, ::-1]
@@ -96,7 +96,7 @@ class DerbrisDetector:
 
     @staticmethod
     def list_model_paths():
-        base_path = get_model_path()
+        base_path = config.BEACHBOT_MODELS
         modelfolders = [f.path for f in os.scandir(base_path) if f.is_dir()]
         # sort by date
         modelfolders.sort(
