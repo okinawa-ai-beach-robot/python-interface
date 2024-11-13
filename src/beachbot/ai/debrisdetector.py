@@ -1,5 +1,5 @@
 import os
-import yam2
+import yaml
 
 
 from beachbot.config import config, logger
