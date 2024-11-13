@@ -3,7 +3,7 @@ import datetime, time
 import threading
 import os
 
-from .. import get_data_path, logger
+from beachbot.config import config
 
 
 class VideoWriterOpenCV(threading.Thread):
@@ -41,7 +41,7 @@ class VideoWriterOpenCV(threading.Thread):
 
     @staticmethod
     def get_base_path():
-        basepath = get_data_path() + os.path.sep + "Recordings" + os.path.sep
+        basepath = config.BEACHBOT_CACHE + os.path.sep + "Recordings" + os.path.sep
         os.makedirs(basepath, exist_ok=True)
         return basepath
 
