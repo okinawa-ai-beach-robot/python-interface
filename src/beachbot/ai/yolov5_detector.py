@@ -1,4 +1,3 @@
-from .. import get_model_path, logger
 from .debrisdetector import DerbrisDetector
 
 import numpy as np
