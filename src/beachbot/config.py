@@ -9,12 +9,12 @@ _platform_dirs = PlatformDirs("beachbot", "okinawa-ai-beach-robot")
 
 # Default paths based on PlatformDirs
 default_paths = {
-    "BEACHBOT_HOME": _platform_dirs.user_data_dir,
-    "BEACHBOT_CACHE": _platform_dirs.user_cache_dir,
-    "BEACHBOT_CONFIG": _platform_dirs.user_config_dir,
-    "BEACHBOT_LOGS": _platform_dirs.user_log_dir,
-    "BEACHBOT_MODELS": _platform_dirs.user_cache_dir / "models",
-    "BEACHBOT_DATASETS": _platform_dirs.user_cache_dir / "datasets",
+    "BEACHBOT_HOME": Path(_platform_dirs.user_data_dir),
+    "BEACHBOT_CACHE": Path(_platform_dirs.user_cache_dir),
+    "BEACHBOT_CONFIG": Path(_platform_dirs.user_config_dir),
+    "BEACHBOT_LOGS": Path(_platform_dirs.user_log_dir),
+    "BEACHBOT_MODELS": Path(_platform_dirs.user_cache_dir) / "models",
+    "BEACHBOT_DATASETS": Path(_platform_dirs.user_cache_dir) / "datasets",
 }
 
 
@@ -52,7 +52,11 @@ def setup_logger(config: Config = None):
     logger.setLevel(logging.INFO)
 
     # File handler
-    log_path = os.path.join(config.BEACHBOT_LOGS, "beachbot.log")
+    log_path = config.BEACHBOT_LOGS / "beachbot.log"
+    # Verify log file exists
+    if not log_path.exists():
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        log_path.touch()
     file_handler = logging.FileHandler(log_path)
     file_handler.setLevel(logging.INFO)
 
