@@ -29,18 +29,6 @@ def get_base_path():
         return os.environ["HOME"]
 
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    filename=get_base_path() + os.path.sep + __name__ + ".log", level=logging.INFO
-)
-
-_handler = logging.StreamHandler(sys.stdout)
-_handler.setLevel(logging.INFO)
-_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-_handler.setFormatter(_formatter)
-logger.addHandler(_handler)
-
-
 def get_model_path():
     return get_base_path() + os.path.sep + "Models"
 
