@@ -1,6 +1,6 @@
 import os, threading
 import cv2
-from .. import logger
+from beachbot.config import logger
 
 try:
     from jetson_utils import videoSource, videoOutput
