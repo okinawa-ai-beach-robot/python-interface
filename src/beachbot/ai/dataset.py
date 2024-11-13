@@ -40,7 +40,7 @@ class Dataset:
         return ndata
 
     def list_dataset_paths():
-        base_path = get_dataset_path()
+        base_path = config.BEACHBOT_DATASETS
         datasetfolders = [f.path for f in os.scandir(base_path) if f.is_dir()]
         return datasetfolders
 
