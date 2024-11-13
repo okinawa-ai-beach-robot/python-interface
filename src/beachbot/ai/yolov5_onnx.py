@@ -1,4 +1,4 @@
-from .. import logger
+from beachbot.config import logger
 from .debrisdetector import DerbrisDetector
 from .yolov5_detector import Yolo5Detector
 import onnxruntime
