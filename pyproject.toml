@@ -37,9 +37,10 @@ dependencies = [
     "torchvision==0.18.1",
     "platformdirs==4.3.6",
     "pytest==8.3.3",
-    "huggingface_hub==0.26.2",
+    "huggingface_hub==0.24.7",
     "roboflow==1.1.47",
     "keyring==25.4.1",
+    "yolov5==7.0.14",
 ]
 
 requires-python = ">=3.8, <3.11"
@@ -58,9 +59,10 @@ jetson = [
     "pydbus==0.6.0",
     "platformdirs==4.3.6",
     "pytest==8.3.3",
-    "huggingface_hub==0.26.2",
+    "huggingface_hub==0.24.7",
     "roboflow==1.1.47",
     "keyring==25.4.1",
+    "yolov5==7.0.14",
 ]
 dev = [
     "numpy>=1.24.4",
@@ -79,9 +81,10 @@ dev = [
     "torchvision>=0.18.1",
     "platformdirs>=4.3.6",
     "pytest>=8.3.3",
-    "huggingface_hub>=0.26.2",
+    "huggingface_hub>=0.24.7",
     "roboflow>=1.1.47",
     "keyring>=25.4.1",
+    "yolov5>=7.0.14",
 ]
 
 [project.urls]
