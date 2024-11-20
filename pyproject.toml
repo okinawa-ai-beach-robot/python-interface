@@ -43,7 +43,7 @@ dependencies = [
     "yolov5==7.0.14",
 ]
 
-requires-python = ">=3.8, <3.11"
+requires-python = ">=3.8, <3.9"
 
 [project.urls]
 Source = "https://github.com/okinawa-ai-beach-robot/python-interface"
