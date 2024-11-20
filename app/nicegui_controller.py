@@ -16,7 +16,7 @@ import signal
 from beachbot.manipulators import Motor, DifferentialDrive
 import beachbot.sensors
 import beachbot.utils
-from beachbot import logger
+from beachbot.config import logger
 import Jetson.GPIO as GPIO
 import time
 
