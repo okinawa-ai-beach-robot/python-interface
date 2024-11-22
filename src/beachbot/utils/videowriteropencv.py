@@ -41,7 +41,7 @@ class VideoWriterOpenCV(threading.Thread):
 
     @staticmethod
     def get_base_path():
-        basepath = config.BEACHBOT_CACHE + os.path.sep + "Recordings" + os.path.sep
+        basepath = str(config.BEACHBOT_CACHE) + os.path.sep + "Recordings" + os.path.sep
         os.makedirs(basepath, exist_ok=True)
         return basepath
 
