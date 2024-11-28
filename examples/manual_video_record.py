@@ -1,4 +1,3 @@
-
 import beachbot
 import time
 
@@ -8,9 +7,14 @@ viewer = beachbot.utils.ImageViewerMatplotlib
 
 
 # There are two possible backend to read images from the camera devices
-# cam1 = beachbot.sensors.UsbCameraOpenCV(width=640, height=480, fps=25, dev_id=1)
-# cam1 = beachbot.sensors.JetsonCsiCameraOpenCV()
-cam1 = beachbot.sensors.JetsonGstCameraNative()
+cam1 = beachbot.sensors.UsbCameraOpenCV(width=640, height=480, fps=30, dev_id=0)
+#cam1 = beachbot.sensors.JetsonCsiCameraOpenCV()
+#cam1 = beachbot.sensors.JetsonGstCameraNative()
+
+if isinstance(cam1, beachbot.sensors.UsbCameraOpenCV):
+    # just for fun: print list of video devices and current resolution to console:
+    cam1.list_cameras()
+
 
 # retrieve information on video stream:
 capture_width, capture_height = cam1.get_size()
@@ -18,8 +22,7 @@ capture_width, capture_height = cam1.get_size()
 # Create video file writer, for now only one backend is implemented (opencv):
 videowriter = beachbot.utils.VideoWriterOpenCV("filename_tmp.mp4", fps=10, capture_width=capture_width, capture_height=capture_height )
 
-# just for fun: print list of video devices and current resolution to console:
-cam1.list_cameras()
+
 print("My resolution is:", cam1.get_size())
 
 time.sleep(1)
@@ -37,10 +40,13 @@ try:
     for i in range(200):
         # read frame:
         img1 = cam1.read()
+
         # display camera image:
         w1.show(img1)
+
         # Write into file:
         videowriter.add_frame(img1)
+
         # Wait for a certain amount of time:
         time.sleep(0.1)
 except KeyboardInterrupt as ex:
