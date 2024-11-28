@@ -105,6 +105,6 @@ try:
     DerbrisDetector.add_model("SSDMobilenet_Torchvision", SSDMobileNetTorchvision)
 
 except ModuleNotFoundError as ex:
-    logger.error(
+    logger.warning(
         "torchvision not installed or not available! SSDMobileNetTorchvision not available!"
     )
