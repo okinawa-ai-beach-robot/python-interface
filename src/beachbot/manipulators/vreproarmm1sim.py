@@ -3,7 +3,7 @@ import math
 
 import numpy as np
 
-from .. import config
+from ..config import config
 
 try:
     from scipy import signal
@@ -47,14 +47,10 @@ def translate(point, offset):
     return point[0] + offset[0], point[1] + offset[1]
 
 
-class RoArmM1(threading.Thread):
-    def __init__(self, rate_hz=20, serial_port="/dev/ttyUSB0", gripper_limits=None) -> None:
-        # Init superclass thread
-        super().__init__()
-        # do not block on exit:
-        self.daemon = True
-
-        self.interval = 1.0 / rate_hz
+class VrepRoArmM1Sim():
+    def __init__(self, vrep_sim, gripper_limits=None) -> None:
+        self.vrep_sim = vrep_sim
+     
         self.is_connected = False
 
         self.basepath = config.BEACHBOT_HOME
@@ -104,117 +100,35 @@ class RoArmM1(threading.Thread):
         ]  # Joint angle home position
         self.qs = self.q_home
 
-        if serial_port is not None:
+        self.vrep_jointnames_arm=['base_to_L1', 'L1_to_L2', 'L2_to_L3', 'L3_to_L4', ]
+        self.vrep_jointnames_gripper=['L4_to_L5_1_A', 'L4_to_L5_1_B' ]
 
-            try:
-                self.device = serial.Serial(
-                    serial_port, timeout=0, baudrate=115200
-                )  # open serial port
-                # self.device.open()
-            except Exception as e:
-                print("error open serial port: " + str(e))
-            self.is_connected = self.device.isOpen()
+        self.vrep_jointids_arm = [self.vrep_sim.getObject("/"+jn) for jn in self.vrep_jointnames_arm]
+        self.vrep_jointids_gripper = [self.vrep_sim.getObject("/"+jn) for jn in self.vrep_jointnames_gripper]
 
-        self._write_lock = threading.Lock()
-        self._status_lock = threading.Lock()
-        self._joint_changed = threading.Condition()
-        self._joint_targets = None
-
-        if self.is_connected:
-            super().start()
-
-    def run(self):
-        while self.is_connected:
-            functime = time.time()
-            self.refresh_robot_state()
-            functime = time.time() - functime
-
-            if functime < self.interval:
-                time.sleep(self.interval - functime)
-            else:
-                raise Exception(
-                    "Error: Out of time! ("
-                    + str(functime)
-                    + ","
-                    + str(self.interval)
-                    + ")"
-                )
-
-    def write_io(self, data):
-        with self._write_lock:
-            self.device.write(data.encode())
-
-    def close_io(self):
-        if self.device.isOpen():
-            self.device.close()
-        self.is_connected = False
-
-    def refresh_robot_state(self):
-        # request arm state
-        self.write_io('{"T":5}\n')
-        for strdata in self.device.readlines():
-            if not strdata.startswith(b"{"):
-                # Ignore information messages
-                # Only interpred json data {....}
-                continue
-            try:
-                data = json.loads(strdata)
-                if "T" not in data:
-                    # robot status package recieved:
-                    qs = [float(data.get("A" + str(num + 1), 0)) for num in range(5)]
-                    taus = [float(data.get("T" + str(num + 1), 0)) for num in range(5)]
-                    qs_changed = any(
-                        [math.fabs(a - b) > 0.1 for a, b in zip(qs, self.qs)]
-                    )
-                    with self._status_lock:
-                        self.qs = qs
-                        self.taus = taus
-                    if qs_changed:
-                        with self._joint_changed:
-                            self._joint_changed.notify_all()
-            except Exception as ex:
-                print("Read error:" + strdata.decode())
-                print("Exception:", ex)
-                self.close_io()
+      
 
     def get_joint_angles(self):
-        with self._status_lock:
-            res = self.qs.copy()
+        res = [self.vrep_sim.getJointPosition(jid)*180/math.pi for jid in self.vrep_jointids_arm]
+        res += [self.vrep_sim.getJointPosition(self.vrep_jointids_gripper[0])*180/math.pi]
         return res
 
     def get_joint_torques(self):
-        with self._status_lock:
-            res = self.taus.copy()
+        res = [self.vrep_sim.getJointForce(jid) for jid in self.vrep_jointids_arm]
+        res += [self.vrep_sim.getJointForce(self.vrep_jointids_gripper[0])]
         return res
 
     def get_joint_state(self):
         with self._status_lock:
-            res = (self.qs.copy(), self.taus.copy())
+            res = (self.get_joint_angles(), self.get_joint_torques())
         return res
 
     def set_joint_targets(self, qs):
-        # TODO add simple bounds/in-range check!
-        data = json.dumps(
-            {
-                "T": 1,
-                "P1": qs[0],
-                "P2": qs[1],
-                "P3": qs[2],
-                "P4": qs[3],
-                "P5": qs[4],
-                "S1": 0,
-                "S2": 0,
-                "S3": 0,
-                "S4": 0,
-                "S5": 0,
-                "A1": 60,
-                "A2": 60,
-                "A3": 60,
-                "A4": 60,
-                "A5": 60,
-            }
-        )
-        self.write_io(data)
+        for i in range(4):
+            self.vrep_sim.setJointTargetPosition(self.vrep_jointids_arm[i], qs[i]*math.pi/180)
+        q_gripper = qs[4]*math.pi/180
+        self.vrep_sim.setJointTargetPosition(self.vrep_jointids_gripper[0], -q_gripper)
+        self.vrep_sim.setJointTargetPosition(self.vrep_jointids_gripper[1], q_gripper)
 
     def set_gripper(self, pos):
         if pos < 0:
@@ -227,15 +141,25 @@ class RoArmM1(threading.Thread):
         self.set_joint_targets(qt)
 
     def set_joints_enabled(self, is_enabled):
-        if is_enabled:
-            self.write_io('{"T":9,"P1":8}\n')
-        else:
-            self.write_io('{"T":9,"P1":7}\n')
+        for jid in self.vrep_jointids_arm:
+            if is_enabled:
+                self.vrep_sim.setJointMode(self.vrep_sim.jointdynctrl_position)
+            else:
+                self.vrep_sim.setJointMode(self.vrep_sim.jointdynctrl_free)
 
     def wait_for_movement(self, timeout=None):
-        with self._joint_changed:
-            res = self._joint_changed.wait(timeout)
-        return res
+        qs_old = self.get_joint_angles()
+        t_start = time.time()
+        t_now=t_start
+        while timeout==None or t_now-t_start<timeout:
+            time.sleep(0.1)
+            qs_new = self.get_joint_angles()
+            qs_changed = any(
+                    [math.fabs(a - b) > 0.1 for a, b in zip(qs_old, qs_new)]
+            )
+            if qs_changed:
+                return True
+        return False
 
     def record_trajectory(
         self, resample_steps=-1, wait_time_max=10, max_record_steps=250, save_path=None
