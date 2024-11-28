@@ -1,5 +1,6 @@
 import time
 import math
+from typing import Tuple
 
 from beachbot.config import logger
 
