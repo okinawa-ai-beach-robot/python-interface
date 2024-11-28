@@ -188,8 +188,14 @@ class DifferentialDrive(threading.Thread):
     def cleanup(self):
         self._is_running = False
         time.sleep(1.0 / self.update_freq)
-        self._is_running = False
-        time.sleep(1.0 / self.update_freq)
+        self.motor_left.change_speed(0)
+        self.motor_right.change_speed(0)
+        self.motor_left.cleanup()
+        self.motor_right.cleanup()
+        try:
+            GPIO.cleanup()
+        except Exception as ex:
+            logger.error("GPIO cleanup failed (bug in GPIO?)")
 
     def run(self):
         self._is_running = True

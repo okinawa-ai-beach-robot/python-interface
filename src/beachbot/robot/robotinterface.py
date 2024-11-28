@@ -55,4 +55,10 @@ class RobotInterface(object):
     def move_arm_home(self):
         self.arm.go_home()
 
+    def cleanup(self):
+        self.arm.cleanup()
+        self.platform.cleanup()
+        self.get_camera_image(None)
+
+
 
