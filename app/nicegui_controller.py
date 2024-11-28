@@ -13,11 +13,14 @@ import numpy as np
 
 import sys
 import signal
-from beachbot.manipulators import Motor, DifferentialDrive
-import beachbot.sensors
-import beachbot.utils
-from beachbot.config import logger
-import Jetson.GPIO as GPIO
+#from beachbot.manipulators import Motor, DifferentialDrive
+#import beachbot.sensors
+import beachbot
+from beachbot import logger
+from beachbot.robot import RobotInterface, JetsonRobotV1
+
+
+
 import time
 
 
@@ -30,10 +33,8 @@ from nicegui import app, ui
 tab_names = ["Control", "Live View", "Recordings"]
 
 
-# There are three possible backend to read images from the camera devices
-# cam1 = beachbot.sensors.UsbCameraOpenCV(width=640, height=480, fps=25, dev_id=1)
-# cam1 = beachbot.sensors.JetsonCsiCameraOpenCV()
-cam1 = beachbot.sensors.JetsonGstCameraNative()
+robot = JetsonRobotV1()
+cam1 = robot.cameradevices[RobotInterface.CAMERATYPE.FRONT]
 # retrieve information on video stream:
 capture_width, capture_height = cam1.get_size()
 # Create video file writer, for now only one backend is implemented (opencv):
@@ -42,18 +43,10 @@ videowriter = None  # beachbot.utils.VideoWriterOpenCV(None, fps=10, capture_wid
 
 video_is_recording = False
 
-pwm_pins = [32, 33]
-gpio_pins = [15, 7, 29, 31]
-_frequency_hz = 5000
 
-GPIO.setmode(GPIO.BOARD)
 
-motor_left = Motor("motor_left", pwm_pins[0], gpio_pins[0], gpio_pins[1], _frequency_hz)
-motor_right = Motor(
-    "motor_right", pwm_pins[1], gpio_pins[2], gpio_pins[3], _frequency_hz
-)
 
-robot_drive = DifferentialDrive(motor_left, motor_right)
+
 
 sleep_time = 0.1
 
@@ -87,12 +80,12 @@ def toggle_recoding(doit):
 
 def joystick_move(data):
     coordinates.set_text(f"{data.x:.3f}, {data.y:.3f}")
-    robot_drive.set_target(data.x * 100, data.y * 100)
+    robot.set_target_velocity(data.x * 100, data.y * 100)
 
 
 def joystick_end():
     coordinates.set_text("0, 0")
-    robot_drive.set_target(0, 0)
+    robot.set_target_velocity(0, 0)
 
 
 def sys_shutdown():
@@ -156,13 +149,6 @@ async def grab_video_frame() -> Response:
     return Response(content=jpeg, media_type="image/jpeg")
 
 
-# # For non-flickering image updates an interactive image is much better than `ui.image()`.
-# video_image = ui.interactive_image().classes('w-full h-full')
-# # A timer constantly updates the source of the image.
-# # Because data from same paths are cached by the browser,
-# # we must force an update by adding the current timestamp to the source.
-# ui.timer(interval=0.1, callback=lambda: video_image.set_source(f'/video/frame?{time.time()}'))
-
 
 with ui.tabs().classes("w-full") as tabs:
     # tabs.on('click', lambda s: reload_files())
@@ -182,14 +168,14 @@ with tab_panel:
                 ui.item("Shut Down", on_click=sys_shutdown)
         ui.label("Robot Control Panel")
         ui.add_head_html(
-            """
-<style>
-    .custom-joystick[data-joystick] div {
-        width: calc(90vmin);
-        height: calc(90vmin);
-    }
-</style>
-"""
+                    """
+                    <style>
+                        .custom-joystick[data-joystick] div {
+                            width: calc(90vmin);
+                            height: calc(90vmin);
+                        }
+                    </style>
+                    """
         )
         ui.joystick(
             color="blue",
@@ -241,18 +227,9 @@ async def cleanup() -> None:
 
     print("Exit, cleaning up...")
     joystick_end()
-    robot_drive.cleanup()
-    motor_left.change_speed(0)
-    motor_right.change_speed(0)
-    motor_left.cleanup()
-    motor_right.cleanup()
     if videowriter is not None:
         videowriter.close()
-    cam1.stop()
-    try:
-        GPIO.cleanup()
-    except Exception as ex:
-        logger.error("GPIO cleanup failed (bug in GPIO?)")
+    robot.cleanup()
     # sys.exit(0)
 
 
