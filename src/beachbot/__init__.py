@@ -4,3 +4,5 @@ from . import manipulators
 from . import sensors
 from . import ai
 from . import utils
+from .config import config
+

@@ -35,6 +35,9 @@ class Config:
             cls._instance = super(Config, cls).__new__(cls)
             cls._instance.initialize_paths()
         return cls._instance
+    
+    def __str__(self):
+        return "Beachbot path configuration:\n"  + "\n".join([f"\t{pk}:{getattr(self,pk)}" for pk in default_paths.keys()])
 
     def initialize_paths(self):
         """Initialize paths with environment variables or defaults."""
