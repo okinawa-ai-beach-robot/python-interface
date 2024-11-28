@@ -46,7 +46,7 @@ def translate(point, offset):
 
 
 class RoArmM1(threading.Thread):
-    def __init__(self, rate_hz=20, serial_port="/dev/ttyUSB0") -> None:
+    def __init__(self, rate_hz=20, serial_port="/dev/ttyUSB0", gripper_limits=None) -> None:
         # Init superclass thread
         super().__init__()
         # do not block on exit:
@@ -80,14 +80,7 @@ class RoArmM1(threading.Thread):
         # Factor (constant) for modulation of relative orintation of joint4 to desired gripper orientation
         self.rateTZ = 2
 
-        self.q_home = [
-            180.0,
-            -12,
-            100.2832031,
-            45.0,
-            180.0,
-        ]  # Joint angle home position
-        self.qs = self.q_home
+
 
         # Home position in cartesian space:
         self.initPosX = self.LEN_B + self.LEN_D + self.LEN_E
@@ -95,8 +88,21 @@ class RoArmM1(threading.Thread):
         self.initPosZ = self.LEN_A + self.LEN_C - self.LEN_F
         self.initPosT = 90
 
-        self.gripper_open = 180
-        self.gripper_close = 260
+        if gripper_limits is None:
+            self.gripper_open = 180
+            self.gripper_close = 260
+        else:
+            self.gripper_open = gripper_limits[0]
+            self.gripper_close = gripper_limits[1]
+
+        self.q_home = [
+            180.0,
+            -12,
+            100.2832031,
+            45.0,
+            self.gripper_open,
+        ]  # Joint angle home position
+        self.qs = self.q_home
 
         if serial_port is not None:
 
