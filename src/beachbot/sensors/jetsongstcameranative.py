@@ -1,6 +1,6 @@
 import os, threading
 import cv2
-from .. import logger
+from beachbot.config import logger
 
 try:
     from jetson_utils import videoSource, videoOutput
@@ -14,8 +14,19 @@ except ModuleNotFoundError as ex:
 
 class JetsonGstCameraNative:
     def __init__(self, width=1280, height=720, fps=15, dev_id=0) -> None:
-        self._camera = videoSource("csi://" + str(dev_id), options={"width": width, "height": height, "framerate": fps, "numBuffers": 2, "flipMethod": "vertical-flip"})
-        self.bgr_img = jetson_utils.cudaAllocMapped(width=width, height=height, format="bgr8")
+        self._camera = videoSource(
+            "csi://" + str(dev_id),
+            options={
+                "width": width,
+                "height": height,
+                "framerate": fps,
+                "numBuffers": 2,
+                "flipMethod": "vertical-flip",
+            },
+        )
+        self.bgr_img = jetson_utils.cudaAllocMapped(
+            width=width, height=height, format="bgr8"
+        )
 
     @staticmethod
     def list_cameras():
@@ -30,9 +41,9 @@ class JetsonGstCameraNative:
             jetson_utils.cudaDeviceSynchronize()
             self._frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
         except:
-            self._frame=None
+            self._frame = None
 
-        #self._frame = cudaToNumpy(cuda_img, isBGR=True)
+        # self._frame = cudaToNumpy(cuda_img, isBGR=True)
         return self._frame
 
     def stop(self):

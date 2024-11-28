@@ -1,4 +1,5 @@
-from .. import logger
+from beachbot.config import logger
+
 try:
     from jetson_utils import videoOutput
     from jetson_utils import cudaFromNumpy

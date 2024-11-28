@@ -1,8 +1,8 @@
-from .. import get_model_path, logger
 from .debrisdetector import DerbrisDetector
 
 import numpy as np
 import cv2 as cv
+
 
 class Yolo5Detector(DerbrisDetector):
     def __init__(self, model_file=None) -> None:
@@ -23,11 +23,11 @@ class Yolo5Detector(DerbrisDetector):
         crop_w = image.shape[1] - intended_x
         crop_h = image.shape[0] - intended_y
         if crop_h > 0:
-            image = image[(crop_h // 2) : (crop_h // 2)+h]
+            image = image[(crop_h // 2) : (crop_h // 2) + h]
         if crop_w > 0:
-            image = image[:, (crop_w // 2) : (crop_w // 2)+w]
+            image = image[:, (crop_w // 2) : (crop_w // 2) + w]
         return image
-    
+
     # Do somhow the inverse mapping of box coordinates to compensate _crop_and_scale_image
     def _map_resuts_to_input_image(self, boxes, image, units_percent=True):
         h = image.shape[0]
@@ -46,27 +46,21 @@ class Yolo5Detector(DerbrisDetector):
         for b in boxes:
             # box format is: [left, top, width, height]
             # add offsets of box left & top to match cropped image from _crop_and_scale:
-            b[0]+=(crop_w//2)
-            b[1]+=(crop_h//2)
+            b[0] += crop_w // 2
+            b[1] += crop_h // 2
 
             if units_percent:
-                b[0]/=w
-                b[1]/=h
-                b[2]/=w
-                b[3]/=h
+                b[0] /= w
+                b[1] /= h
+                b[2] /= w
+                b[3] /= h
             else:
                 # pixel coordinates, round box coordinates to int
-                b[0]=round(b[0])
-                b[1]=round(b[1])
-                b[2]=round(b[2])
-                b[3]=round(b[3])
-        
+                b[0] = round(b[0])
+                b[1] = round(b[1])
+                b[2] = round(b[2])
+                b[3] = round(b[3])
 
-
-
-    
-
-    
     def _wrap_detection(self, output_data, confidence_threshold=0.2):
         class_ids = []
         confidences = []
@@ -83,13 +77,18 @@ class Yolo5Detector(DerbrisDetector):
                 class_id = np.argmax(classes_scores)
 
                 # for YOLO, confidence is calculated by box_confidence*class_csonfidence, if we exceed, we add it to the results:
-                if classes_scores[class_id]*box_confidence > confidence_threshold:
-                    confidences.append(classes_scores[class_id]*box_confidence)
+                if classes_scores[class_id] * box_confidence > confidence_threshold:
+                    confidences.append(classes_scores[class_id] * box_confidence)
                     class_ids.append(class_id)
 
-                    x, y, w, h = row[0].item(), row[1].item(), row[2].item(), row[3].item()
-                    left = (x - 0.5 * w)
-                    top = (y - 0.5 * h)
+                    x, y, w, h = (
+                        row[0].item(),
+                        row[1].item(),
+                        row[2].item(),
+                        row[3].item(),
+                    )
+                    left = x - 0.5 * w
+                    top = y - 0.5 * h
                     width = w
                     height = h
 
@@ -108,4 +107,3 @@ class Yolo5Detector(DerbrisDetector):
             result_boxes.append(boxes[i])
 
         return result_class_ids, result_confidences, result_boxes
-
