@@ -33,12 +33,11 @@ class VrepCameraSim():
 
 
     def read(self):
-        print("Read cam:", self._cam_id, self._cam_name)
         img, [resX, resY] = self.vrep_sim.getVisionSensorImg(self._cam_id)
         self._width=resX
         self._height=resY
         img = np.frombuffer(img, dtype=np.uint8).reshape(self._height, self._width, 3)
-        self._frame = cv2.flip(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), 0)
+        self._frame = cv2.flip(img, 0) #cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         return self._frame
 
     def stop(self):

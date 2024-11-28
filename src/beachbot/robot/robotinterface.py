@@ -15,7 +15,6 @@ class RobotInterface(object):
         raise NotImplementedError()
     
     def get_camera_image(self, which:CAMERATYPE=CAMERATYPE.FRONT, stop_others=True):
-        print("read cam:", which)
         res = None
         if stop_others:
             for cameraid in self.cameradevices.keys():

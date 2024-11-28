@@ -119,6 +119,9 @@ class Motor:
             raise ValueError(
                 f"Speed must be between -100 and 100 inclusive. Received: {speed}"
             )
+        if speed<1 and speed>-1:
+            speed=0
+
 
         self.duty_cycle_percent = abs(speed)
 
@@ -204,7 +207,7 @@ class DifferentialDrive(threading.Thread):
             # do work....
 
             # safety stop:
-            if self._command_timeout is not None and self._command_timeout>0:
+            if self._command_timeout is not None and self._command_timeout>0 and (self._target_angular_vel!=0 or self._target_velocity!=0):
                 td_last_command = t_start-self._last_command_update
                 if td_last_command>self._command_timeout:
                     # timeout, no command recieved for self._command_timeout seconds -> stop robot movement
@@ -214,6 +217,7 @@ class DifferentialDrive(threading.Thread):
             # Update current angular and linear velocity
             dir_delta = self._target_angular_vel - self._current_angular_vel
             vel_delta = self._target_velocity - self._current_velocity
+            
 
             dir_dir = sign(dir_delta)
             vel_dir = sign(vel_delta)
@@ -237,34 +241,16 @@ class DifferentialDrive(threading.Thread):
             self._current_velocity = bounded(
                 self._current_velocity + vel_dot, -100, 100
             )
-            self._current_angular_vel = bounded(
-                self._current_angular_vel + dir_dot, -100, 100
-            )
-            self._current_velocity = bounded(
-                self._current_velocity + vel_dot, -100, 100
-            )
 
             # Estimate motor velocity based on angluar and linear velocity and update motors if changed:
             __motor_left_speed = bounded(
                 self._current_velocity + 0.5 * self._current_angular_vel, -100, 100
             )
-            __motor_right_speed = bounded(
-                self._current_velocity - 0.5 * self._current_angular_vel, -100, 100
-            )
-            __motor_left_speed = bounded(
-                self._current_velocity + 0.5 * self._current_angular_vel, -100, 100
-            )
+
             __motor_right_speed = bounded(
                 self._current_velocity - 0.5 * self._current_angular_vel, -100, 100
             )
 
-            # +/-15 percent no motion ...
-            __motor_left_speed = bounded(
-                sign(__motor_left_speed) * 15 + __motor_left_speed, -100, 100
-            )
-            __motor_right_speed = bounded(
-                sign(__motor_right_speed) * 15 + __motor_right_speed, -100, 100
-            )
             # +/-15 percent no motion ...
             __motor_left_speed = bounded(
                 sign(__motor_left_speed) * 15 + __motor_left_speed, -100, 100
@@ -286,11 +272,12 @@ class DifferentialDrive(threading.Thread):
             if t_wait > 0:
                 time.sleep(t_wait)
         # Cleanup, end control loop, stop motors :)
-        # Cleanup, end control loop, stop motors :)
+
         self.motor_left.change_speed(0)
         self.motor_right.change_speed(0)
 
     def set_target(self, angular_vel=0, velocity=0):
+        self._last_command_update = time.time()
         self._target_angular_vel = angular_vel
         self._target_velocity = velocity
 

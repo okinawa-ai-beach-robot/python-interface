@@ -16,6 +16,7 @@ class VrepRobotSimV1(RobotInterface):
         # Simulator Setup:
         self._vrep_handle = RemoteAPIClient(verbose=False)
         self._vrep_sim = self._vrep_handle.require('sim')
+        self._vrep_sim.stopSimulation(True)
 
         self._vrep_sim.loadScene(self._base_folder_sim+os.sep+"scene.ttt")
         self._vrep_sim.startSimulation()

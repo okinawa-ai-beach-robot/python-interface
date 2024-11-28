@@ -144,6 +144,9 @@ class RoArmM1(threading.Thread):
         with self._write_lock:
             self.device.write(data.encode())
 
+    def cleanup(self):
+        self.close_io()
+
     def close_io(self):
         if self.device.isOpen():
             self.device.close()

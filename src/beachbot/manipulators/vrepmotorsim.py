@@ -19,6 +19,13 @@ class VrepMotorSim():
             raise ValueError(
                 f"Speed must be between -100 and 100 inclusive. Received: {speed}"
             )
-        print("set speed:", self._motor_id,self._motor_name, self._max_velocity * speed / 100 )
+        # start moving at 15% power (as real platform has friction), if lower than 15% -> do not move
+        if speed<15 and speed>-15:
+            speed=0
+        elif speed<=-15:
+                speed += 15
+        elif speed>=15:
+             speed -= 15
+
         self.vrep_sim.setJointTargetVelocity(self._motor_id, self._max_velocity * speed / 100)
         
