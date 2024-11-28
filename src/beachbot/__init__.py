@@ -4,5 +4,6 @@ from . import manipulators
 from . import sensors
 from . import ai
 from . import utils
+from . import robot
 from .config import config
-
+from .config import logger
