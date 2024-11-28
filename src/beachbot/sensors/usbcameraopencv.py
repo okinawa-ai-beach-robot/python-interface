@@ -5,7 +5,7 @@ import cv2
 from beachbot.config import config, logger
 
 class UsbCameraOpenCV(threading.Thread):
-    def __init__(self, width=640, height=480, fps=25, dev_id=1) -> None:
+    def __init__(self, width=640, height=480, fps=25, dev_id=1, autostart=True) -> None:
         # Init superclass thread
         super().__init__()
         # do not block on exit:
@@ -15,10 +15,27 @@ class UsbCameraOpenCV(threading.Thread):
 
         self._lock = threading.Lock()
 
-        self._cap = cv2.VideoCapture(dev_id)
-        self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-        self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        self._cap.set(cv2.CAP_PROP_FPS, fps)
+        self._width=width
+        self._height=height
+        self._fps=fps
+        self._dev_id=dev_id
+
+        if autostart:
+            self.start()
+
+
+
+    @staticmethod
+    def list_cameras():
+        print(os.popen("v4l2-ctl --list-devices").read())
+        print(os.popen("v4l2-ctl -d /dev/video1 --list-formats-ext").read())
+
+    def start(self):
+        if self._stopped:
+            self._cap = cv2.VideoCapture(self._dev_id)
+            self._cap.set(cv2.CAP_PROP_FRAME_WIDTH, self._width)
+            self._cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self._height)
+            self._cap.set(cv2.CAP_PROP_FPS, self._fps)
 
         if self._cap.isOpened():
             self._cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
@@ -56,8 +73,11 @@ class UsbCameraOpenCV(threading.Thread):
             logger.error("Could not release camera!s")
 
 
+    def is_running(self):
+        return not self._stopped
+
     def get_size(self):
         if self._frame.shape is not None:
             return (self._frame.shape[1], self._frame.shape[0])
-        return (0, 0)
+        return (self._width, self._height)
         # This does not reflect actual size: return (int(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))

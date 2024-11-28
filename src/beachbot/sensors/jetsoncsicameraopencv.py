@@ -39,7 +39,7 @@ def gstreamer_pipeline_builder(
 
 
 class JetsonCsiCameraOpenCV(threading.Thread):
-    def __init__(self, width=1280, height=720, fps=15, dev_id=0) -> None:
+    def __init__(self, width=1280, height=720, fps=15, dev_id=0, autostart=True) -> None:
         # Init superclass thread
         super().__init__()
         # do not block on exit:
@@ -49,12 +49,26 @@ class JetsonCsiCameraOpenCV(threading.Thread):
 
         self._lock = threading.Lock()
 
+        self._width=width
+        self._height=height
+        self._fps=fps
+        self._dev_id=dev_id
+
+        if autostart:
+            self.start()
+
+    @staticmethod
+    def list_cameras():
+        print(os.popen("v4l2-ctl --list-devices").read())
+        print(os.popen("v4l2-ctl --list-formats-ext").read())
+
+    def start(self):
         self._cap = cv2.VideoCapture(
             gstreamer_pipeline_builder(
-                sensor_id=dev_id,
-                capture_width=width,
-                capture_height=height,
-                framerate=fps,
+                sensor_id=self._dev_id,
+                capture_width=self._width,
+                capture_height=self._height,
+                framerate=self._fps,
                 flip_method=2,
             ),
             cv2.CAP_GSTREAMER,
@@ -66,11 +80,6 @@ class JetsonCsiCameraOpenCV(threading.Thread):
             #self._frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
             self._stopped = False
             super().start()
-
-    @staticmethod
-    def list_cameras():
-        print(os.popen("v4l2-ctl --list-devices").read())
-        print(os.popen("v4l2-ctl --list-formats-ext").read())
 
     def run(self):
         while not self._stopped:
@@ -86,8 +95,12 @@ class JetsonCsiCameraOpenCV(threading.Thread):
         return img_cpy
 
     def stop(self):
-        self._stopped = True
-        self._cap.release()
+        if self.is_running():
+            self._stopped = True
+            self._cap.release()
+
+    def is_running(self):
+        return not self._stopped
 
     def get_size(self):
         return (
