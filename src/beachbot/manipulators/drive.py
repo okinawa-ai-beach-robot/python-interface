@@ -265,8 +265,6 @@ class DifferentialDrive(threading.Thread):
             t_end = time.time()
             t_wait = (1.0 / self.update_freq) - (t_end - t_start)
             if t_wait > 0:
-            t_wait = (1.0 / self.update_freq) - (t_end - t_start)
-            if t_wait > 0:
                 time.sleep(t_wait)
         # Cleanup, end control loop, stop motors :)
         # Cleanup, end control loop, stop motors :)
