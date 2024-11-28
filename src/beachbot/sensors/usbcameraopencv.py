@@ -1,6 +1,8 @@
 import os, threading
+import time
 import cv2
 
+from beachbot.config import config, logger
 
 class UsbCameraOpenCV(threading.Thread):
     def __init__(self, width=640, height=480, fps=25, dev_id=1) -> None:
@@ -24,11 +26,14 @@ class UsbCameraOpenCV(threading.Thread):
             self._frame = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2RGB)
             self._stopped = False
             super().start()
+        else:
+            logger.error(f"Could not open camera, device available, resolution and framerate supported? check with v4l2-ctl -d /dev/video{dev_id} --list-formats-ext")
+            print()
 
     @staticmethod
     def list_cameras():
         print(os.popen("v4l2-ctl --list-devices").read())
-        print(os.popen("v4l2-ctl -d /dev/video1 --list-formats-ext").read())
+        print(os.popen("for d in /dev/video* ; do echo $d ; v4l2-ctl --device=$d -D --list-formats-ext  ; echo '===============' ; done").read())
 
     def run(self):
         while not self._stopped:
@@ -44,7 +49,12 @@ class UsbCameraOpenCV(threading.Thread):
 
     def stop(self):
         self._stopped = True
-        self._cap.release()
+        counter=0
+        while(self._cap.isOpened() and counter<10):
+            time.sleep(0.1)
+        if counter==10:
+            logger.error("Could not release camera!s")
+
 
     def get_size(self):
         if self._frame.shape is not None:
