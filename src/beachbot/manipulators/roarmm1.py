@@ -278,12 +278,14 @@ class RoArmM1(threading.Thread):
 
         return qs, taus, ts
 
-    def replay_trajectory(self, qs, ts=None, freq=20):
+    def replay_trajectory(self, qs, ts=None, freq=20, gripper_overwrite=None):
         self.set_joints_enabled(True)
         time.sleep(0.5)
         ts_start = time.time()
 
         for t in range(qs.shape[0]):
+            if gripper_overwrite is not None:
+                qs[t][-1]=gripper_overwrite
             self.set_joint_targets(qs[t])
             wtime = 0
             ts_now = time.time()
