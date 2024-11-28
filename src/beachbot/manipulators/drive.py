@@ -144,7 +144,7 @@ class Motor:
 
 
 class DifferentialDrive(threading.Thread):
-    def __init__(self, motor_left, motor_right, update_freq=100) -> None:
+    def __init__(self, motor_left, motor_right, update_freq=100, command_timeout=1.0) -> None:
         # Init superclass thread
         super().__init__()
         # Do not block on exit (TODO)
@@ -179,6 +179,10 @@ class DifferentialDrive(threading.Thread):
         self.motor_left.change_speed(self._motor_left_speed)
         self.motor_right.change_speed(self._motor_right_speed)
 
+        self._last_command_update=time.time()
+        self._command_timeout=command_timeout
+
+
         super().start()
 
     def cleanup(self):
@@ -192,6 +196,14 @@ class DifferentialDrive(threading.Thread):
         while self._is_running:
             t_start = time.time()
             # do work....
+
+            # safety stop:
+            if self._command_timeout is not None and self._command_timeout>0:
+                td_last_command = t_start-self._last_command_update
+                if td_last_command>self._command_timeout:
+                    # timeout, no command recieved for self._command_timeout seconds -> stop robot movement
+                    self.set_target(0, 0)
+
 
             # Update current angular and linear velocity
             dir_delta = self._target_angular_vel - self._current_angular_vel
@@ -272,7 +284,7 @@ class DifferentialDrive(threading.Thread):
         self.motor_left.change_speed(0)
         self.motor_right.change_speed(0)
 
-    def set_target(self, angular_vel, velocity):
+    def set_target(self, angular_vel=0, velocity=0):
         self._target_angular_vel = angular_vel
         self._target_velocity = velocity
 
