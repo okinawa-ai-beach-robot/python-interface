@@ -5,7 +5,7 @@ from beachbot.config import logger
 
 try:
     import Jetson.GPIO as GPIO
-except ModuleNotFoundError as ex:
+except (ModuleNotFoundError, RuntimeError) as ex:
     logger.warning(
         "Jetson GPIO library not installed or not available! Motor interface may not be available!"
     )
