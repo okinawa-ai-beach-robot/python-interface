@@ -3,6 +3,7 @@ import math
 
 import numpy as np
 
+from ..utils.vrepsimulation import vrep
 from ..config import config
 
 try:
@@ -107,22 +108,25 @@ class VrepRoArmM1Sim():
         self.vrep_jointids_gripper = [self.vrep_sim.getObject("/"+jn) for jn in self.vrep_jointnames_gripper]
 
       
-
+    @vrep
     def get_joint_angles(self):
         res = [self.vrep_sim.getJointPosition(jid)*180/math.pi for jid in self.vrep_jointids_arm]
         res += [self.vrep_sim.getJointPosition(self.vrep_jointids_gripper[0])*180/math.pi]
         return res
 
+    @vrep
     def get_joint_torques(self):
         res = [self.vrep_sim.getJointForce(jid) for jid in self.vrep_jointids_arm]
         res += [self.vrep_sim.getJointForce(self.vrep_jointids_gripper[0])]
         return res
 
+    @vrep
     def get_joint_state(self):
         with self._status_lock:
             res = (self.get_joint_angles(), self.get_joint_torques())
         return res
 
+    @vrep
     def set_joint_targets(self, qs):
         for i in range(4):
             self.vrep_sim.setJointTargetPosition(self.vrep_jointids_arm[i], qs[i]*math.pi/180)
@@ -130,6 +134,7 @@ class VrepRoArmM1Sim():
         self.vrep_sim.setJointTargetPosition(self.vrep_jointids_gripper[0], -q_gripper)
         self.vrep_sim.setJointTargetPosition(self.vrep_jointids_gripper[1], q_gripper)
 
+    @vrep
     def set_gripper(self, pos):
         if pos < 0:
             pos = 0
@@ -140,6 +145,7 @@ class VrepRoArmM1Sim():
         qt[-1] = jpos
         self.set_joint_targets(qt)
 
+    @vrep
     def set_joints_enabled(self, is_enabled):
         for jid in self.vrep_jointids_arm:
             if is_enabled:

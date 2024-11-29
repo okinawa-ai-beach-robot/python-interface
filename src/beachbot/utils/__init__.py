@@ -2,6 +2,7 @@ from .imageviewermatplotlib import ImageViewerMatplotlib
 from .imageviewerjetson import ImageViewerJetson
 from .videowriteropencv import VideoWriterOpenCV
 from .videoserveropencv import VideoServerOpenCV
+from .vrepsimulation import *
 from .timer import Timer
 
 

@@ -2,6 +2,8 @@ import os, threading
 import numpy as np
 import cv2
 
+from ..utils.vrepsimulation import vrep
+
 
 class VrepCameraSim():
     def __init__(self, vrep_sim, cam_name) -> None:
@@ -12,7 +14,7 @@ class VrepCameraSim():
         self._cam_name=cam_name
         self._cam_id = self.vrep_sim.getObject("/"+cam_name)
 
-        img, [resX, resY] = self.vrep_sim.getVisionSensorImg(self._cam_id)
+        img, [resX, resY] = self._read_visionsensor()
         self._width=resX
         self._height=resY
 
@@ -20,6 +22,11 @@ class VrepCameraSim():
 
         img = np.frombuffer(img, dtype=np.uint8).reshape(resY, resX, 3)
         self._frame = cv2.flip(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), 0)
+
+    @vrep
+    def _read_visionsensor(self):
+        img, [resX, resY] = self.vrep_sim.getVisionSensorImg(self._cam_id)
+        return img, [resX, resY]
 
 
 
@@ -33,7 +40,7 @@ class VrepCameraSim():
 
 
     def read(self):
-        img, [resX, resY] = self.vrep_sim.getVisionSensorImg(self._cam_id)
+        img, [resX, resY] = self._read_visionsensor()
         self._width=resX
         self._height=resY
         img = np.frombuffer(img, dtype=np.uint8).reshape(self._height, self._width, 3)
