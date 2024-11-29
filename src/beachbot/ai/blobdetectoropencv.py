@@ -39,15 +39,17 @@ class BlobDetectorOpenCV(DebrisDetector):
 
 
 
-    def apply_model(self, inputs, confidence_threshold=0.2, units_percent=True):  
+    def apply_model(self, inputs, confidence_threshold=0.2, units_percent=True, debug=False):  
         img = inputs
         row, col, _ = img.shape
         s_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)  
-        cv2.imwrite("img.png", s_img)
+        if debug:
+            cv2.imwrite("img.png", s_img)
 
         hsv_img = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
 
-        cv2.imwrite("hsv.png", hsv_img)
+        if debug:
+            cv2.imwrite("hsv.png", hsv_img)
 
         lower_blue = np.array([60, 60, 60])
         upper_blue = np.array([180, 255, 255]) 
@@ -56,19 +58,24 @@ class BlobDetectorOpenCV(DebrisDetector):
         mask_blue = cv2.erode(mask_blue, None, iterations=0)
         mask_blue = cv2.dilate(mask_blue, None, iterations=0)
         s_img = cv2.bitwise_and(s_img,s_img,mask = mask_blue)
-        cv2.imwrite("mask.png", mask_blue)
-        cv2.imwrite("s_img.png", s_img)
+        if debug:
+            cv2.imwrite("mask.png", mask_blue)
+            cv2.imwrite("s_img.png", s_img)
         keyp = self.detector.detect(mask_blue)
 
         result_boxes = []
         result_class_ids=[]
         result_confidences=[]
         for p in keyp:
-            print(p.pt, p.size, row, col)
-            left = p.pt[0]/col
-            top = (row-p.pt[1])/row
-            width = (p.size*2)/col
-            height = (p.size*2)/row
+            if debug:
+                print("Blob detector output:", p.pt, p.size, row, col)
+
+            width = (p.size)/col
+            height = (p.size)/row
+            left = (p.pt[0]-p.size/2)/col
+            top = (p.pt[1]-p.size/2)/row
+            if debug:
+                print("Box from blob is:", left, top, width, height)
             bbox = np.array([left, top, width, height])
             result_boxes.append(bbox)
             result_class_ids.append(self.list_classes.index("trash_easy"))

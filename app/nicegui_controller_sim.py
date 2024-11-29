@@ -145,6 +145,25 @@ def convert(frame: np.ndarray) -> bytes:
     return imencode_image.tobytes()
 
 
+
+def add_imgbox(pleft=0, ptop=0, w=0, h=0, clsstr=None, color='#FF0000', align="start"):
+    # color = 'SkyBlue'
+    video_image.content += f'<rect x="{pleft*100}%" y="{ptop*100}%" ry="15" height="{h*100}%" width="{w*100}%" fill="none" stroke="{color}" stroke-width="4" />'
+    if clsstr is not None:
+        if align=="start":
+            video_image.content += f'<text text-anchor="start" x="{pleft*100}%" y="{ptop*100}%" stroke="{color}" font-size="2em">{clsstr}</text>'
+        else:
+            video_image.content += f'<text text-anchor="{align}" x="{(pleft+w)*100}%" y="{(ptop+h)*100}%" stroke="{color}" font-size="2em">{clsstr}</text>'
+    
+
+def detection(frame, detector):
+    class_ids, confidences, boxes = detector.apply_model(frame)
+    video_image.content = ""
+    for classid, confidence, box in zip(class_ids, confidences, boxes):
+        if confidence >= 0.01:
+            add_imgbox(*box, detector.list_classes[classid])
+
+
 @app.get("/video/frame")
 # Thanks to FastAPI's `app.get`` it is easy to create a web route which always provides the latest image from OpenCV.
 async def grab_video_frame() -> Response:
@@ -153,6 +172,10 @@ async def grab_video_frame() -> Response:
     frame = await run.io_bound(cam1.read)
     if frame is None:
         return placeholder
+    
+    if detector is not None:
+        await run.io_bound(detection, frame, detector)
+
     # `convert` is a CPU-intensive function, so we run it in a separate process to avoid blocking the event loop and GIL.
     jpeg = await run.cpu_bound(convert, frame)
     return Response(content=jpeg, media_type="image/jpeg")

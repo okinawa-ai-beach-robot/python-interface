@@ -1,7 +1,7 @@
 from ..utils.vrepsimulation import vrep
 
 class VrepMotorSim():
-    def __init__(self, vrep_sim, motor_name, max_velocity=10):
+    def __init__(self, vrep_sim, motor_name, max_velocity=5):
         self.vrep_sim = vrep_sim
         self._motor_name = motor_name
         self._max_velocity=max_velocity
