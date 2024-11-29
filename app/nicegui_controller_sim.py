@@ -19,6 +19,7 @@ import beachbot
 from beachbot import logger
 from beachbot.robot import RobotInterface, VrepRobotSimV1
 from beachbot.ai import BlobDetectorOpenCV
+from beachbot.control import ApproachDebrisController, BoxDef
 
 
 
@@ -63,12 +64,28 @@ placeholder = Response(
 
 detector = None
 def toggle_detection(doit):
-    global detector
+    global detector, video_image
+    video_image.content = ""
     print("Detection:", doit)
     if doit:
         detector = BlobDetectorOpenCV()
     else:
         detector=None
+
+
+controller = None
+def toggle_control(doit):
+    global controller
+    print("Control:", doit)
+    if doit:
+        controller = ApproachDebrisController()
+        controller.ctrl.kp=kp_slider.value
+    else:
+        controller=None
+
+def update_kp(new_kp):
+    if controller is not None:
+        controller.ctrl.kp=kp_slider.value
 
 def toggle_recoding(doit):
     global video_is_recording, videowriter
@@ -156,12 +173,16 @@ def add_imgbox(pleft=0, ptop=0, w=0, h=0, clsstr=None, color='#FF0000', align="s
             video_image.content += f'<text text-anchor="{align}" x="{(pleft+w)*100}%" y="{(ptop+h)*100}%" stroke="{color}" font-size="2em">{clsstr}</text>'
     
 
-def detection(frame, detector):
+def detection(frame, detector, controller=None):
     class_ids, confidences, boxes = detector.apply_model(frame)
     video_image.content = ""
+    boxlist = []
     for classid, confidence, box in zip(class_ids, confidences, boxes):
         if confidence >= 0.01:
             add_imgbox(*box, detector.list_classes[classid])
+            boxlist.append(BoxDef(left=box[0], top=box[1], w=box[2], h=box[3], class_name=detector.list_classes[classid]))
+    if controller is not None:
+        controller.update(robot, boxlist)
 
 
 @app.get("/video/frame")
@@ -174,7 +195,7 @@ async def grab_video_frame() -> Response:
         return placeholder
     
     if detector is not None:
-        await run.io_bound(detection, frame, detector)
+        await run.io_bound(detection, frame, detector, controller)
 
     # `convert` is a CPU-intensive function, so we run it in a separate process to avoid blocking the event loop and GIL.
     jpeg = await run.cpu_bound(convert, frame)
@@ -192,7 +213,16 @@ with tab_panel:
             toggle1 = ui.toggle(
                 {1: "Video Stop", 2: "Record"}, value=1
             ).on_value_change(lambda v: toggle_recoding(v.value == 2))
-            do_detect = ui.switch('Blob Detection', on_change=lambda x: toggle_detection(x.value))
+            with ui.column():
+                with ui.row().classes("w-full"):
+                    do_detect = ui.switch('Blob Detection', on_change=lambda x: toggle_detection(x.value))
+                    ui.space()
+                    do_control = ui.switch('Robot Control', on_change=lambda x: toggle_control(x.value))
+                
+                with ui.row().classes("w-full justify-between no-wrap"):
+                    ui.label("kd:")
+                    kp_slider = ui.slider(min=0.1, max=100, step=0.1, value=0.1, on_change=lambda x: update_kp(x.value)).props('label')
+
             with ui.dropdown_button("System", auto_close=True):
                 ui.item("Exit Server", on_click=app.shutdown)
                 ui.item("Shut Down", on_click=sys_shutdown)
@@ -225,7 +255,7 @@ with tab_panel:
             pass
         ui.label("Media Viewer:")
         ui.label(beachbot.utils.VideoWriterOpenCV.get_base_path())
-        uivideo = ui.video("/my_videos/clouds.mp4")
+        uivideo = ui.video()
 
 reload_files()
 
