@@ -13,9 +13,9 @@ import numpy as np
 
 import sys
 import signal
-from beachbot.manipulators import Motor, DifferentialDrive
-import beachbot.sensors
-import beachbot.utils
+from beachbot.manipulators.drive import Motor, DifferentialDrive
+from beachbot.sensors.jetsongstcameranative import JetsonGstCameraNative
+from beachbot.utils.videowriteropencv import VideoWriterOpenCV
 from beachbot.config import logger
 import Jetson.GPIO as GPIO
 import time
@@ -33,7 +33,7 @@ tab_names = ["Control", "Live View", "Recordings"]
 # There are three possible backend to read images from the camera devices
 # cam1 = beachbot.sensors.UsbCameraOpenCV(width=640, height=480, fps=25, dev_id=1)
 # cam1 = beachbot.sensors.JetsonCsiCameraOpenCV()
-cam1 = beachbot.sensors.JetsonGstCameraNative()
+cam1 = JetsonGstCameraNative()
 # retrieve information on video stream:
 capture_width, capture_height = cam1.get_size()
 # Create video file writer, for now only one backend is implemented (opencv):
@@ -58,7 +58,7 @@ robot_drive = DifferentialDrive(motor_left, motor_right)
 sleep_time = 0.1
 
 
-media = Path(beachbot.utils.VideoWriterOpenCV.get_base_path())
+media = Path(VideoWriterOpenCV.get_base_path())
 app.add_media_files("/my_videos", media)
 
 # image placeholder in case no video device available:
@@ -206,7 +206,7 @@ with tab_panel:
         with ui.dropdown_button("Select File...", auto_close=True) as selector:
             pass
         ui.label("Media Viewer:")
-        ui.label(beachbot.utils.VideoWriterOpenCV.get_base_path())
+        ui.label(VideoWriterOpenCV.get_base_path())
         uivideo = ui.video("/my_videos/clouds.mp4")
 
 reload_files()
