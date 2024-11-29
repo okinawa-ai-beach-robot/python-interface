@@ -238,7 +238,7 @@ with tab_panel:
                     do_control = ui.switch('Robot Control', on_change=lambda x: toggle_control(x.value))
                 
                 with ui.row().classes("w-full justify-between no-wrap"):
-                    ui.label("kd:")
+                    ui.label("kp:")
                     kp_slider = ui.slider(min=0.1, max=100, step=0.1, value=0.1, on_change=lambda x: update_kp(x.value)).props('label')
 
             with ui.dropdown_button("System", auto_close=True):
