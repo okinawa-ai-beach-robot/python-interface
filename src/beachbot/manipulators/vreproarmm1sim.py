@@ -35,8 +35,11 @@ def rotate(point, angle, origin=(0, 0)):
 
     angle = angle * math.pi / 180
 
+    print("rotimpl", angle, math.cos(angle), math.sin(angle) )
+
     qx = ox + math.cos(angle) * (px - ox) - math.sin(angle) * (py - oy)
     qy = oy + math.sin(angle) * (px - ox) + math.cos(angle) * (py - oy)
+    print(oy , math.sin(angle) * (px - ox) , math.cos(angle) * (py - oy))
     return qx, qy
 
 
@@ -100,13 +103,24 @@ class VrepRoArmM1Sim():
             self.gripper_open,
         ]  # Joint angle home position
 
+        # Joint offsets to transform robot joints to simulator joints:
         self.q_zero = [
-            180.0,
+            0.0,
             75.0,
             0.0,
             0.0, #135.0,
-            self.gripper_open,
-        ]  # Joint angle home position
+            0.0
+        ] 
+
+        # define home position in cartesian space as zero-point
+        self.cart_home = self.fkin(self.q_home[:4]) #  [self.initPosX, self.initPosY, self.initPosZ]
+        self.cart_gripper_angle_home=self.initPosT
+        test = self.inv_kin(self.cart_home, self.initPosT)
+        test2 = self.fkin([180, 90, -0, -0])
+        #test3 = self.inv_kin(test2, 90)
+        test3=-1
+        print( test2, test3)
+
 
 
         self.qs = self.q_home
@@ -116,6 +130,24 @@ class VrepRoArmM1Sim():
 
         self.vrep_jointids_arm = [self.vrep_sim.getObject("/"+jn) for jn in self.vrep_jointnames_arm]
         self.vrep_jointids_gripper = [self.vrep_sim.getObject("/"+jn) for jn in self.vrep_jointnames_gripper]
+
+    def set_cart_pos(self, pos_target, tool_angle):
+        # target relative to home position:
+        qs = self.inv_kin([t+o for  t,o in zip(pos_target, self.cart_home)], tool_angle+self.cart_gripper_angle_home)
+
+
+        test2 = self.fkin(qs)
+        print([t+o for  t,o in zip(pos_target, self.cart_home)], qs, test2)
+
+        qs = list(qs)
+        #qs[1]*=-1
+        qs[3]*=-1
+
+
+
+
+        self.set_joint_targets(qs,do_offsetcompensation=True)
+
 
       
     @vrep
@@ -139,13 +171,17 @@ class VrepRoArmM1Sim():
         return res
 
     @vrep
-    def set_joint_targets(self, qs):
+    def set_joint_targets(self, qs, do_offsetcompensation=True):
         for i in range(4):
-            qt = self.q_zero[i] - qs[i]
+            if do_offsetcompensation:
+                qt = self.q_zero[i] - qs[i]
+            else:
+                qt = qs[i]
             self.vrep_sim.setJointTargetPosition(self.vrep_jointids_arm[i], qt*math.pi/180)
-        q_gripper = qs[4]*math.pi/180
-        self.vrep_sim.setJointTargetPosition(self.vrep_jointids_gripper[0], -q_gripper)
-        self.vrep_sim.setJointTargetPosition(self.vrep_jointids_gripper[1], q_gripper)
+        if len(qs)>4:
+            q_gripper = qs[4]*math.pi/180
+            self.vrep_sim.setJointTargetPosition(self.vrep_jointids_gripper[0], -q_gripper)
+            self.vrep_sim.setJointTargetPosition(self.vrep_jointids_gripper[1], q_gripper)
 
     @vrep
     def set_gripper(self, pos):
@@ -220,10 +256,13 @@ class VrepRoArmM1Sim():
             np.savez(save_path, qs=qs, taus=taus, ts=ts)
 
         return qs, taus, ts
+    
+    def cleanup(self):
+        pass
 
     def replay_trajectory(self, qs, ts=None, freq=20, gripper_overwrite=None):
         print("replay")
-        self.set_joints_enabled(True)
+        #self.set_joints_enabled(True)
         time.sleep(0.5)
         ts_start = time.time()
 
@@ -269,6 +308,7 @@ class VrepRoArmM1Sim():
         qs_grab = data["qs"]
         taus_grab = data["taus"]
         ts_grab = data["ts"].tolist()
+        print(ts_grab)
 
         # data = data2
 
@@ -279,7 +319,7 @@ class VrepRoArmM1Sim():
 
     
         #self.refresh_robot_state()
-        self.go_home()
+        #self.go_home()
         self.replay_trajectory(qs_grab, ts_grab)
         time.sleep(1)
         # close gripper
@@ -290,8 +330,8 @@ class VrepRoArmM1Sim():
 
         # open gripper
         #self.set_gripper(0.0)
-        time.sleep(1)
-        self.go_home()
+        #time.sleep(1)
+        #self.go_home()
         print("Done!")
 
 
@@ -324,8 +364,9 @@ class VrepRoArmM1Sim():
         p = translate(p, (self.LEN_B, self.LEN_A))
 
         # Rotate robot arm in x/y plane (joint 1):
+        print("rotate",p[0],  angle_1 - 180, )
         p_plane = rotate((p[0], self.LEN_H), angle_1 - 180)
-
+        print("rotate",p[0],  angle_1 - 180, p_plane)
         # Combine X/Z and X/Y plane caculation for final result:
         return (p_plane[0], p_plane[1], p[1])
 

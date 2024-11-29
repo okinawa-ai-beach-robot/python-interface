@@ -63,6 +63,17 @@ placeholder = Response(
 )
 
 
+
+
+def arm_action_cartesian():
+    x = cart_x_slider.value
+    y = cart_y_slider.value
+    z = cart_z_slider.value
+    r = cart_r_slider.value
+    robot.arm.set_cart_pos([x,y,z], r)
+    
+    
+
 def arm_action_home():
     print("Arm go home")
     robot.arm.go_home()
@@ -76,9 +87,9 @@ def arm_action_calib():
     print("Arm go zero")
     robot.arm.go_calib()
 
-def arm_action_test():
+async def arm_action_test():
     print("Arm go test")
-    robot.arm.test_movement()
+    await run.io_bound(robot.arm.test_movement)
 
 detector = None
 def toggle_detection(doit):
@@ -250,6 +261,7 @@ with tab_panel:
                 with ui.tabs().classes("w-full") as tabs_ctrl:
                     one_ctrl = ui.tab("Locomotion")
                     two_ctrl = ui.tab("Arm")
+                    three_ctrl = ui.tab("Arm Cart")
                 tab_panel_ctrl = ui.tab_panels(tabs_ctrl, value=one_ctrl).classes("w-full")
                 with tab_panel_ctrl:
                     with ui.tab_panel(one_ctrl):
@@ -278,6 +290,20 @@ with tab_panel:
                         ui.button("Go Calib", on_click=lambda x: arm_action_calib())
                         ui.button("Go Zero", on_click=lambda x: arm_action_zero())
                         ui.button("Go Test", on_click=lambda x: arm_action_test())
+                    with ui.tab_panel(three_ctrl):
+                        ui.button("Activate", on_click=lambda x: arm_action_cartesian())
+                        with ui.row().classes("w-full justify-between no-wrap"):
+                            ui.label("x:")
+                            cart_x_slider = ui.slider(min=-200, max=200, step=1, value=0.0, on_change=lambda x: arm_action_cartesian()).props('label')
+                        with ui.row().classes("w-full justify-between no-wrap"):
+                            ui.label("y:")
+                            cart_y_slider = ui.slider(min=-200, max=200, step=1, value=0.0, on_change=lambda x: arm_action_cartesian()).props('label')
+                        with ui.row().classes("w-full justify-between no-wrap"):
+                            ui.label("z:")
+                            cart_z_slider = ui.slider(min=-200, max=100, step=1, value=0.0, on_change=lambda x: arm_action_cartesian()).props('label')
+                        with ui.row().classes("w-full justify-between no-wrap"):
+                            ui.label("r:")
+                            cart_r_slider = ui.slider(min=-45, max=45, step=1.0, value=0.0, on_change=lambda x: arm_action_cartesian()).props('label')
             with splitter.after:
                 video_image = ui.interactive_image().classes("w-full h-full")
     with ui.tab_panel(two):
