@@ -1,10 +1,10 @@
-from .debrisdetector import DerbrisDetector
+from .debrisdetector import DebrisDetector
 
 import numpy as np
 import cv2 as cv
 
 
-class Yolo5Detector(DerbrisDetector):
+class Yolo5Detector(DebrisDetector):
     def __init__(self, model_file=None) -> None:
         super().__init__(model_file)
 

@@ -5,7 +5,7 @@ import yaml
 from beachbot.config import config, logger
 
 
-class DerbrisDetector:
+class DebrisDetector:
     _model_lib = {}
     _description = """
     Abstract base class of coastal debris classificator.\n
@@ -80,19 +80,19 @@ class DerbrisDetector:
 
     @staticmethod
     def list_models_by_type(type):
-        return DerbrisDetector._model_lib.get(type, [])
+        return DebrisDetector._model_lib.get(type, [])
 
     @staticmethod
     def add_model(type, modelcls):
-        curr_list = DerbrisDetector._model_lib.get(type, [])
+        curr_list = DebrisDetector._model_lib.get(type, [])
         if modelcls not in curr_list:
             curr_list.append(modelcls)
-            DerbrisDetector._model_lib[type] = curr_list
+            DebrisDetector._model_lib[type] = curr_list
             logger.info("Added class " + str(modelcls) + " with type " + str(type))
 
     @staticmethod
     def list_model_types():
-        return list(DerbrisDetector._model_lib.keys())
+        return list(DebrisDetector._model_lib.keys())
 
     @staticmethod
     def list_model_paths():
@@ -120,5 +120,5 @@ class DerbrisDetector:
 
     @staticmethod
     def list_models_by_path(modelpath):
-        model_type = DerbrisDetector.get_model_type(modelpath)
-        return DerbrisDetector.list_models_by_type(model_type)
+        model_type = DebrisDetector.get_model_type(modelpath)
+        return DebrisDetector.list_models_by_type(model_type)

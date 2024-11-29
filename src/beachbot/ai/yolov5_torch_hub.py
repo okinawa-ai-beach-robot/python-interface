@@ -1,5 +1,5 @@
 from beachbot.config import logger
-from .debrisdetector import DerbrisDetector
+from .debrisdetector import DebrisDetector
 from .yolov5_detector import Yolo5Detector
 import torch
 import numpy as np
@@ -120,8 +120,8 @@ try:
 
             return result_class_ids, result_confidences, result_boxes
 
-    DerbrisDetector.add_model("YOLOv5_Torch_Hub", Yolo5TorchHub)
-    DerbrisDetector.add_model("YOLOv5", Yolo5TorchHub)
+    DebrisDetector.add_model("YOLOv5_Torch_Hub", Yolo5TorchHub)
+    DebrisDetector.add_model("YOLOv5", Yolo5TorchHub)
 
 except ModuleNotFoundError as ex:
     logger.error(

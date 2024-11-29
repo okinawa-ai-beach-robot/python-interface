@@ -30,10 +30,10 @@ beachbot.logger.info("Video " + vid_file + " loaded, resolution is " + str(img_w
 
 
 beachbot.logger.info("Load AI model")
-model_type = beachbot.ai.DerbrisDetector.get_model_type(model_file)
+model_type = beachbot.ai.DebrisDetector.get_model_type(model_file)
 beachbot.logger.info("Model type is" + str(model_type))
 
-model_cls_list= beachbot.ai.DerbrisDetector.list_models_by_type(model_type)
+model_cls_list= beachbot.ai.DebrisDetector.list_models_by_type(model_type)
 beachbot.logger.info("Available model backends are " + str(model_cls_list))
 beachbot.logger.info("Here we will take the first one: " + str(model_cls_list[0]))
 

@@ -1,4 +1,4 @@
-from .debrisdetector import DerbrisDetector
+from .debrisdetector import DebrisDetector
 from .yolov5_detector import Yolo5Detector
 import cv2
 import numpy as np
@@ -81,4 +81,4 @@ class Yolo5OpenCV(Yolo5Detector):
         return result_class_ids, result_confidences, result_boxes
     
 
-DerbrisDetector.add_model("YOLOv5", Yolo5OpenCV)
+DebrisDetector.add_model("YOLOv5", Yolo5OpenCV)

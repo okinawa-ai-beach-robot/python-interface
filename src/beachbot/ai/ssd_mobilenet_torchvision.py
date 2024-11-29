@@ -1,5 +1,5 @@
 from beachbot.config import logger
-from .debrisdetector import DerbrisDetector
+from .debrisdetector import DebrisDetector
 import torch
 
 try:
@@ -12,7 +12,7 @@ try:
     from os.path import isfile, join
     import yaml
 
-    class SSDMobileNetTorchvision(DerbrisDetector):
+    class SSDMobileNetTorchvision(DebrisDetector):
         _description = """
         SSD implementation published by Nvidia based on Pytorch and torch Hub.\n
         """
@@ -102,7 +102,7 @@ try:
 
             return result_class_ids, result_confidences, result_boxes
 
-    DerbrisDetector.add_model("SSDMobilenet_Torchvision", SSDMobileNetTorchvision)
+    DebrisDetector.add_model("SSDMobilenet_Torchvision", SSDMobileNetTorchvision)
 
 except ModuleNotFoundError as ex:
     logger.warning(

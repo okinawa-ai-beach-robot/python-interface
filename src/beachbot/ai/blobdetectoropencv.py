@@ -1,14 +1,10 @@
-from .debrisdetector import DerbrisDetector
+from .debrisdetector import DebrisDetector
 from .yolov5_detector import Yolo5Detector
 import cv2
 import numpy as np
 
-import os
-from os import listdir
-from os.path import isfile, join
-import yaml
 
-class BlobDetectorOpenCV(DerbrisDetector):
+class BlobDetectorOpenCV(DebrisDetector):
     _description="""
     BlobDetectorOpenCV implementation of simple blob detector.
     """
@@ -46,12 +42,10 @@ class BlobDetectorOpenCV(DerbrisDetector):
     def apply_model(self, inputs, confidence_threshold=0.2, units_percent=True):  
         img = inputs
         row, col, _ = img.shape
-        _max = max(col, row)
         s_img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)  
         cv2.imwrite("img.png", s_img)
 
         hsv_img = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
-        print(hsv_img)
 
         cv2.imwrite("hsv.png", hsv_img)
 
@@ -85,4 +79,4 @@ class BlobDetectorOpenCV(DerbrisDetector):
         return result_class_ids, result_confidences, result_boxes
     
 
-DerbrisDetector.add_model("BlobDetector", BlobDetectorOpenCV)
+DebrisDetector.add_model("BlobDetector", BlobDetectorOpenCV)

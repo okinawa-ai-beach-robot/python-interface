@@ -44,20 +44,20 @@ except Exception as ex:
 
 
 
-model_paths = beachbot.ai.DerbrisDetector.list_model_paths()
+model_paths = beachbot.ai.DebrisDetector.list_model_paths()
 print("Model paths are", model_paths)
-model_path = beachbot.ai.DerbrisDetector.list_model_paths()[0]
+model_path = beachbot.ai.DebrisDetector.list_model_paths()[0]
 print("Model path is", model_path)
 #model_path = beachbot.get_model_path()+os.path.sep+"beachbot_yolov5s_beach-cleaning-object-detection__v3-augmented_ver__2__yolov5pytorch_1280"
-model_path = beachbot.ai.DerbrisDetector.list_model_paths()[0]
+model_path = beachbot.ai.DebrisDetector.list_model_paths()[0]
 print("Model path is", model_path)
 
 model_file = model_path+os.path.sep+"best.onnx"
 
-model_type = beachbot.ai.DerbrisDetector.get_model_type(model_path)
+model_type = beachbot.ai.DebrisDetector.get_model_type(model_path)
 print("Model type is", model_type)
 
-model_cls_list= beachbot.ai.DerbrisDetector.list_models_by_type(model_type)
+model_cls_list= beachbot.ai.DebrisDetector.list_models_by_type(model_type)
 print("Model classes are", model_cls_list)
 
 model_cls = model_cls_list[0]
@@ -117,10 +117,10 @@ async def sel_model(idx, backend_id=0):
         print("Model path is", model_path)
 
         model_file = model_path+os.path.sep+"best.onnx"
-        model_type = beachbot.ai.DerbrisDetector.get_model_type(model_path)
+        model_type = beachbot.ai.DebrisDetector.get_model_type(model_path)
         print("Model type is", model_type)
 
-        model_cls_list= beachbot.ai.DerbrisDetector.list_models_by_type(model_type)
+        model_cls_list= beachbot.ai.DebrisDetector.list_models_by_type(model_type)
         print("Model classes are", model_cls_list)
 
         model_cls = model_cls_list[backend_id]
