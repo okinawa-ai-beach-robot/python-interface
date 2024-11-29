@@ -1,6 +1,7 @@
 from ..sensors import JetsonCsiCameraOpenCV, UsbCameraOpenCV
-from ..manipulators import DifferentialDrive, Motor, RoArmM1
+from ..manipulators import DifferentialDrive, JetsonMotor, RoArmM1
 from .robotinterface import RobotInterface
+import Jetson.GPIO as GPIO
 
 
 
@@ -19,8 +20,8 @@ class JetsonRobotV1(RobotInterface):
         GPIO.setmode(GPIO.BOARD)
 
         # Motor Controller Setup:
-        motor_left = Motor("motor_left", pwm_pins[0], gpio_pins[0], gpio_pins[1], _frequency_hz)
-        motor_right = Motor("motor_right", pwm_pins[1], gpio_pins[2], gpio_pins[3], _frequency_hz)
+        motor_left = JetsonMotor("motor_left", pwm_pins[0], gpio_pins[0], gpio_pins[1], _frequency_hz)
+        motor_right = JetsonMotor("motor_right", pwm_pins[1], gpio_pins[2], gpio_pins[3], _frequency_hz)
         self.platform = DifferentialDrive(motor_left, motor_right)
 
         # Init Robot arm, gripper limits [q_open, q_close] must be adjusted to gripper hardware!

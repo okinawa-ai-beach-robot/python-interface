@@ -48,14 +48,12 @@ def main():
     kd = 0.0
     setpoint_x = 0.0
     setpoint_y = 0.0
-    pid_controller = manipulators.drive.PIDController(
-        kp, ki, kd, setpoint_x, setpoint_y
-    )
+    pid_controller = utils.controllercollection.PIDController(setpoint_x, setpoint_y, kp, ki, kd)
 
     # Example Motor setup and initialization
     # TODO get default pin values from some beachbot.util definition
-    motor_left = manipulators.drive.Motor(pwm_pin=18, in1=23, in2=24, frequency_hz=100)
-    motor_right = manipulators.drive.Motor(pwm_pin=25, in1=8, in2=7, frequency_hz=100)
+    motor_left = manipulators.JetsonMotor(pwm_pin=18, in1=23, in2=24, frequency_hz=100)
+    motor_right = manipulators.JetsonMotor(pwm_pin=25, in1=8, in2=7, frequency_hz=100)
 
     # Load model
     # TODO
