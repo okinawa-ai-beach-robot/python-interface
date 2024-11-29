@@ -1,7 +1,11 @@
 from ..sensors import JetsonCsiCameraOpenCV, UsbCameraOpenCV
 from ..manipulators import DifferentialDrive, JetsonMotor, RoArmM1
 from .robotinterface import RobotInterface
-import Jetson.GPIO as GPIO
+
+try:
+    import Jetson.GPIO as GPIO
+except Exception:
+    pass
 
 
 

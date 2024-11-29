@@ -99,6 +99,16 @@ class VrepRoArmM1Sim():
             45.0,
             self.gripper_open,
         ]  # Joint angle home position
+
+        self.q_zero = [
+            180.0,
+            15.0,#10.0,
+            280.0,
+            280.0, #135.0,
+            self.gripper_open,
+        ]  # Joint angle home position
+
+
         self.qs = self.q_home
 
         self.vrep_jointnames_arm=['base_to_L1', 'L1_to_L2', 'L2_to_L3', 'L3_to_L4', ]
@@ -124,12 +134,15 @@ class VrepRoArmM1Sim():
     def get_joint_state(self):
         with self._status_lock:
             res = (self.get_joint_angles(), self.get_joint_torques())
+            for i in range(4):
+                res[i] = res[i] + self.q_zero[i] 
         return res
 
     @vrep
     def set_joint_targets(self, qs):
         for i in range(4):
-            self.vrep_sim.setJointTargetPosition(self.vrep_jointids_arm[i], qs[i]*math.pi/180)
+            qt = qs[i] - self.q_zero[i]
+            self.vrep_sim.setJointTargetPosition(self.vrep_jointids_arm[i], qt*math.pi/180)
         q_gripper = qs[4]*math.pi/180
         self.vrep_sim.setJointTargetPosition(self.vrep_jointids_gripper[0], -q_gripper)
         self.vrep_sim.setJointTargetPosition(self.vrep_jointids_gripper[1], q_gripper)
@@ -233,6 +246,50 @@ class VrepRoArmM1Sim():
     def go_home(self):
         self.set_joint_targets(self.q_home)
         time.sleep(1)
+
+    def go_zero(self):
+        self.set_joint_targets([0,0,0,0]+[self.q_zero[-1]])
+        time.sleep(1)
+
+    def go_calib(self):
+        self.set_joint_targets(self.q_zero)
+        time.sleep(1)
+
+    def test_movement(self):
+        pathfile = os.path.dirname(__file__)
+        # Load the .npz file
+        data = np.load(str(pathfile) + "/../../../arm/pickup_path.npz")
+        #data2 = np.load(str(pathfile) + "/../../../arm/toss_path.npz")
+
+        # Access the arrays by their keys
+        qs_grab = data["qs"]
+        taus_grab = data["taus"]
+        ts_grab = data["ts"].tolist()
+
+        # data = data2
+
+        # # Access the arrays by their keys
+        # qs_toss = data["qs"]
+        # taus_toss = data["taus"]
+        # ts_toss = data["ts"].tolist()
+
+    
+        #self.refresh_robot_state()
+        self.go_home()
+        self.replay_trajectory(qs_grab, ts_grab)
+        time.sleep(1)
+        # close gripper
+        self.set_gripper(0.8)
+        time.sleep(1)
+        # self.replay_trajectory(qs_toss, ts_toss)
+        # time.sleep(1)
+
+        # open gripper
+        self.set_gripper(0.0)
+        time.sleep(1)
+        self.go_home()
+        print("Done!")
+
 
     def fkin(self, qs):
         """

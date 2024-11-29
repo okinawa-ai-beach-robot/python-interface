@@ -62,6 +62,24 @@ placeholder = Response(
     content=base64.b64decode(black_1px.encode("ascii")), media_type="image/png"
 )
 
+
+def arm_action_home():
+    print("Arm go home")
+    robot.arm.go_home()
+
+
+def arm_action_zero():
+    print("Arm go zero")
+    robot.arm.go_zero()
+
+def arm_action_calib():
+    print("Arm go zero")
+    robot.arm.go_calib()
+
+def arm_action_test():
+    print("Arm go zero")
+    robot.arm.test_movement()
+
 detector = None
 def toggle_detection(doit):
     global detector, video_image
@@ -120,7 +138,7 @@ def sys_shutdown():
 
 
 def change_media(file):
-    print("cange video:", "/my_videos/" + file)
+    print("load video:", "/my_videos/" + file)
     uivideo.set_source("/my_videos/" + file)
 
 
@@ -229,25 +247,37 @@ with tab_panel:
         with ui.splitter().classes("w-full") as splitter:
             with splitter.before:
                 ui.label("Robot Control Panel")
-                ui.add_head_html(
-                            """
-                            <style>
-                                .custom-joystick[data-joystick]{
-                                    width: 90%;
-                                    height: auto;
-                                    max-height: 90vh;
-                                    aspect-ratio: 1 / 1;
-                                }
-                            </style>
-                            """
-                )
-                ui.joystick(
-                    color="blue",
-                    size=350,
-                    on_move=lambda e: joystick_move(e),
-                    on_end=lambda _: joystick_end(),
-                ).classes("custom-joystick")
-                coordinates = ui.label("0, 0")
+                with ui.tabs().classes("w-full") as tabs_ctrl:
+                    one_ctrl = ui.tab("Locomotion")
+                    two_ctrl = ui.tab("Arm")
+                tab_panel_ctrl = ui.tab_panels(tabs_ctrl, value=one_ctrl).classes("w-full")
+                with tab_panel_ctrl:
+                    with ui.tab_panel(one_ctrl):
+                        ui.add_head_html(
+                                    """
+                                    <style>
+                                        .custom-joystick[data-joystick]{
+                                            width: 90%;
+                                            height: auto;
+                                            max-height: 60vh;
+                                            aspect-ratio: 1 / 1;
+                                        }
+                                    </style>
+                                    """
+                        )
+                        ui.joystick(
+                            color="blue",
+                            size=350,
+                            on_move=lambda e: joystick_move(e),
+                            on_end=lambda _: joystick_end(),
+                        ).classes("custom-joystick")
+                        coordinates = ui.label("0, 0")
+                    with ui.tab_panel(two_ctrl):
+                        ui.label("test")
+                        ui.button("Go Home", on_click=lambda x: arm_action_home())
+                        ui.button("Go Calib", on_click=lambda x: arm_action_calib())
+                        ui.button("Go Zero", on_click=lambda x: arm_action_zero())
+                        ui.button("Go Test", on_click=lambda x: arm_action_test())
             with splitter.after:
                 video_image = ui.interactive_image().classes("w-full h-full")
     with ui.tab_panel(two):
@@ -255,7 +285,7 @@ with tab_panel:
             pass
         ui.label("Media Viewer:")
         ui.label(beachbot.utils.VideoWriterOpenCV.get_base_path())
-        uivideo = ui.video()
+        uivideo = ui.video("src")
 
 reload_files()
 
