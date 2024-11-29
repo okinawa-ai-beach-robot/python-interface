@@ -18,6 +18,7 @@ import signal
 import beachbot
 from beachbot import logger
 from beachbot.robot import RobotInterface, VrepRobotSimV1
+from beachbot.ai import BlobDetectorOpenCV
 
 
 
@@ -30,7 +31,7 @@ from nicegui import Client, app, core, run, ui
 from nicegui import app, ui
 
 
-tab_names = ["Control", "Live View", "Recordings"]
+tab_names = ["Control", "Recordings"]
 
 
 robot = VrepRobotSimV1()
@@ -60,6 +61,14 @@ placeholder = Response(
     content=base64.b64decode(black_1px.encode("ascii")), media_type="image/png"
 )
 
+detector = None
+def toggle_detection(doit):
+    global detector
+    print("Detection:", doit)
+    if doit:
+        detector = BlobDetectorOpenCV()
+    else:
+        detector=None
 
 def toggle_recoding(doit):
     global video_is_recording, videowriter
@@ -101,7 +110,7 @@ def change_media(file):
 def tab_select_event():
     global live_update_timer, tab_names, video_image
     try:
-        if tab_panel.value == tab_names[1]:
+        if tab_panel.value == tab_names[0]:
             if live_update_timer is None:
                 live_update_timer = ui.timer(
                     interval=0.5,
@@ -113,7 +122,7 @@ def tab_select_event():
             if live_update_timer is not None:
                 live_update_timer.cancel()
                 live_update_timer = None
-        if tab_panel.value == tab_names[2]:
+        if tab_panel.value == tab_names[1]:
             print("reload files...")
             reload_files()
     except Exception as ex:
@@ -148,46 +157,47 @@ async def grab_video_frame() -> Response:
     jpeg = await run.cpu_bound(convert, frame)
     return Response(content=jpeg, media_type="image/jpeg")
 
-
-
 with ui.tabs().classes("w-full") as tabs:
     # tabs.on('click', lambda s: reload_files())
     one = ui.tab(tab_names[0])
     two = ui.tab(tab_names[1])
-    three = ui.tab(tab_names[2])
 tab_panel = ui.tab_panels(tabs, value=two).classes("w-full")
 tab_panel.on_value_change(tab_select_event)
 with tab_panel:
     with ui.tab_panel(one):
-        with ui.row():
+        with ui.row().classes("w-full"):
             toggle1 = ui.toggle(
                 {1: "Video Stop", 2: "Record"}, value=1
             ).on_value_change(lambda v: toggle_recoding(v.value == 2))
+            do_detect = ui.switch('Blob Detection', on_change=lambda x: toggle_detection(x.value))
             with ui.dropdown_button("System", auto_close=True):
                 ui.item("Exit Server", on_click=app.shutdown)
                 ui.item("Shut Down", on_click=sys_shutdown)
-        ui.label("Robot Control Panel")
-        ui.add_head_html(
-                    """
-                    <style>
-                        .custom-joystick[data-joystick] div {
-                            width: calc(90vmin);
-                            height: calc(90vmin);
-                        }
-                    </style>
-                    """
-        )
-        ui.joystick(
-            color="blue",
-            size=350,
-            on_move=lambda e: joystick_move(e),
-            on_end=lambda _: joystick_end(),
-        ).classes("custom-joystick")
-        coordinates = ui.label("0, 0")
-
+        with ui.splitter().classes("w-full") as splitter:
+            with splitter.before:
+                ui.label("Robot Control Panel")
+                ui.add_head_html(
+                            """
+                            <style>
+                                .custom-joystick[data-joystick]{
+                                    width: 90%;
+                                    height: auto;
+                                    max-height: 90vh;
+                                    aspect-ratio: 1 / 1;
+                                }
+                            </style>
+                            """
+                )
+                ui.joystick(
+                    color="blue",
+                    size=350,
+                    on_move=lambda e: joystick_move(e),
+                    on_end=lambda _: joystick_end(),
+                ).classes("custom-joystick")
+                coordinates = ui.label("0, 0")
+            with splitter.after:
+                video_image = ui.interactive_image().classes("w-full h-full")
     with ui.tab_panel(two):
-        video_image = ui.interactive_image().classes("w-full h-full")
-    with ui.tab_panel(three):
         with ui.dropdown_button("Select File...", auto_close=True) as selector:
             pass
         ui.label("Media Viewer:")

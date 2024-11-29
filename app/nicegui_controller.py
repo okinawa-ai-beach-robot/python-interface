@@ -170,7 +170,7 @@ with tab_panel:
         ui.add_head_html(
                     """
                     <style>
-                        .custom-joystick[data-joystick] div {
+                        .custom-joystick[data-joystick] {
                             width: calc(90vmin);
                             height: calc(90vmin);
                         }
