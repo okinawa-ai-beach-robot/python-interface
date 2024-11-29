@@ -5,27 +5,18 @@ from os import walk
 
 import base64
 import signal
-import time
 
 import cv2
 import numpy as np
 
-
-import sys
 import signal
-#from beachbot.manipulators import Motor, DifferentialDrive
-#import beachbot.sensors
 import beachbot
 from beachbot import logger
 from beachbot.robot import RobotInterface, JetsonRobotV1
-
-
-
 import time
 
 
 from fastapi import Response
-
 from nicegui import Client, app, core, run, ui
 from nicegui import app, ui
 
