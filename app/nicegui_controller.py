@@ -42,7 +42,7 @@ video_is_recording = False
 sleep_time = 0.1
 
 
-media = Path(beachbot.utils.VideoWriterOpenCV.get_base_path())
+media = Path(VideoWriterOpenCV.get_base_path())
 app.add_media_files("/my_videos", media)
 
 # image placeholder in case no video device available:
@@ -182,7 +182,7 @@ with tab_panel:
         with ui.dropdown_button("Select File...", auto_close=True) as selector:
             pass
         ui.label("Media Viewer:")
-        ui.label(beachbot.utils.VideoWriterOpenCV.get_base_path())
+        ui.label(VideoWriterOpenCV.get_base_path())
         uivideo = ui.video("/my_videos/clouds.mp4")
 
 reload_files()
