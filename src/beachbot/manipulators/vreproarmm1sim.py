@@ -102,9 +102,9 @@ class VrepRoArmM1Sim():
 
         self.q_zero = [
             180.0,
-            15.0,#10.0,
-            280.0,
-            280.0, #135.0,
+            75.0,
+            0.0,
+            0.0, #135.0,
             self.gripper_open,
         ]  # Joint angle home position
 
@@ -141,7 +141,7 @@ class VrepRoArmM1Sim():
     @vrep
     def set_joint_targets(self, qs):
         for i in range(4):
-            qt = qs[i] - self.q_zero[i]
+            qt = self.q_zero[i] - qs[i]
             self.vrep_sim.setJointTargetPosition(self.vrep_jointids_arm[i], qt*math.pi/180)
         q_gripper = qs[4]*math.pi/180
         self.vrep_sim.setJointTargetPosition(self.vrep_jointids_gripper[0], -q_gripper)
@@ -162,9 +162,9 @@ class VrepRoArmM1Sim():
     def set_joints_enabled(self, is_enabled):
         for jid in self.vrep_jointids_arm:
             if is_enabled:
-                self.vrep_sim.setJointMode(self.vrep_sim.jointdynctrl_position)
+                self.vrep_sim.setJointMode(jid, self.vrep_sim.jointdynctrl_position, 0)
             else:
-                self.vrep_sim.setJointMode(self.vrep_sim.jointdynctrl_free)
+                self.vrep_sim.setJointMode(jid, self.vrep_sim.jointdynctrl_free, 0)
 
     def wait_for_movement(self, timeout=None):
         qs_old = self.get_joint_angles()
@@ -222,11 +222,13 @@ class VrepRoArmM1Sim():
         return qs, taus, ts
 
     def replay_trajectory(self, qs, ts=None, freq=20, gripper_overwrite=None):
+        print("replay")
         self.set_joints_enabled(True)
         time.sleep(0.5)
         ts_start = time.time()
 
         for t in range(qs.shape[0]):
+            print("replay", t)
             if gripper_overwrite is not None:
                 qs[t][-1]=gripper_overwrite
             self.set_joint_targets(qs[t])
@@ -242,6 +244,7 @@ class VrepRoArmM1Sim():
 
             if wtime > 0:
                 time.sleep(wtime)
+        print("end")
 
     def go_home(self):
         self.set_joint_targets(self.q_home)
@@ -252,7 +255,8 @@ class VrepRoArmM1Sim():
         time.sleep(1)
 
     def go_calib(self):
-        self.set_joint_targets(self.q_zero)
+        #self.set_joint_targets(self.q_zero)
+        self.set_joint_targets([180,75, 0, 0]+[self.q_zero[-1]])
         time.sleep(1)
 
     def test_movement(self):
@@ -279,13 +283,13 @@ class VrepRoArmM1Sim():
         self.replay_trajectory(qs_grab, ts_grab)
         time.sleep(1)
         # close gripper
-        self.set_gripper(0.8)
-        time.sleep(1)
+        #self.set_gripper(0.8)
+        #time.sleep(1)
         # self.replay_trajectory(qs_toss, ts_toss)
         # time.sleep(1)
 
         # open gripper
-        self.set_gripper(0.0)
+        #self.set_gripper(0.0)
         time.sleep(1)
         self.go_home()
         print("Done!")

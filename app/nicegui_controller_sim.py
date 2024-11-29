@@ -77,7 +77,7 @@ def arm_action_calib():
     robot.arm.go_calib()
 
 def arm_action_test():
-    print("Arm go zero")
+    print("Arm go test")
     robot.arm.test_movement()
 
 detector = None
