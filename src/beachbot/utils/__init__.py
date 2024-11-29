@@ -3,6 +3,7 @@ from .imageviewerjetson import ImageViewerJetson
 from .videowriteropencv import VideoWriterOpenCV
 from .videoserveropencv import VideoServerOpenCV
 from .vrepsimulation import *
+from .controllercollection import *
 from .timer import Timer
 
 
