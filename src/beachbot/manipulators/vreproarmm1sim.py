@@ -115,7 +115,7 @@ class VrepRoArmM1Sim():
         self.q_zero_fac = [
             1.0,
             -1.0,
-            1.0,
+            -1.0,
             -1.0
         ]  # Joint angle home position
 
@@ -128,6 +128,8 @@ class VrepRoArmM1Sim():
         self.vrep_jointids_arm = [self.vrep_sim.getObject("/"+jn) for jn in self.vrep_jointnames_arm]
         self.vrep_jointids_gripper = [self.vrep_sim.getObject("/"+jn) for jn in self.vrep_jointnames_gripper]
 
+        self.vrep_base_id = self.vrep_sim.getObject("/top_mount")
+        self.vrep_gripper_id = self.vrep_sim.getObject("/gripper")
     def set_cart_pos(self, pos_target, tool_angle):
         # target relative to home position:
         qs = self.inv_kin([t+o for  t,o in zip(pos_target, self.cart_home)], tool_angle+self.cart_gripper_angle_home)
@@ -257,6 +259,11 @@ class VrepRoArmM1Sim():
     
     def cleanup(self):
         pass
+
+    @vrep
+    def get_gripper_pos(self):
+        pos = self.vrep_sim.getObjectPosition(self.vrep_gripper_id, self.vrep_base_id)
+        return [pos[1]*1000, -pos[0]*1000, pos[2]*1000]
 
     def replay_trajectory(self, qs, ts=None, freq=20, gripper_overwrite=None):
         print("replay")

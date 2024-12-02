@@ -45,14 +45,16 @@ qs_poses.append(
     ]
 )
 
-for pos in qs_poses:
+for pos in []: #qs_poses:
     print("Testing pose", pos)
     qs_estimate = arm.inv_kin(pos[:3], pos[3])
     pos_estimate = arm.fkin(qs_estimate)
     arm.set_joint_targets(qs_estimate)
     #time.sleep(5)
+    #pos_measured = arm.get_gripper_pos()
 
     print("Position estimate is", pos_estimate)
+    print("Position measured is", pos_measured)
     print("qs estimate is:", qs_estimate)
     for a, b in zip(pos[0:3], pos_estimate):
         if math.fabs(a - b) > epsilon:
@@ -61,7 +63,28 @@ for pos in qs_poses:
 
 print("All ok :)")
 
-print(arm.fkin([0,0,0,0]))
-print(arm.fkin([0,0,0,45]))
+
+# for pos in [
+#     [0,0,0,0],
+#     [45,0,0,0],
+#     [0,45,0,0],
+#     [0,0,45,0],
+#     [0,0,0,45],
+#     [0,45,0,45],
+#     [45,0,45,0],
+
+#     ]:
+#     print(arm.fkin(pos))
+#     arm.set_joint_targets(pos)
+#     time.sleep(5)
+#     print(arm.get_joint_angles())
+#     print(arm.get_gripper_pos())
+#     print("-----")
+
+
+print("fkin", arm.fkin([45,45,0,45]))
+arm.set_joint_targets([45,45,0,45])
+time.sleep(5)
+print(arm.get_gripper_pos())
 
 #j2 range -60...60
