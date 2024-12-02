@@ -105,22 +105,19 @@ class VrepRoArmM1Sim():
 
         # Joint offsets to transform robot joints to simulator joints:
         self.q_zero = [
+            180.0,
+            45.0,
             0.0,
-            75.0,
-            0.0,
-            0.0, #135.0,
-            0.0
-        ] 
+            0.0, 
+            -self.gripper_open,
+        ]  # Joint angle home position
 
-        # define home position in cartesian space as zero-point
-        self.cart_home = self.fkin(self.q_home[:4]) #  [self.initPosX, self.initPosY, self.initPosZ]
-        self.cart_gripper_angle_home=self.initPosT
-        test = self.inv_kin(self.cart_home, self.initPosT)
-        test2 = self.fkin([180, 90, -0, -0])
-        #test3 = self.inv_kin(test2, 90)
-        test3=-1
-        print( test2, test3)
-
+        self.q_zero_fac = [
+            1.0,
+            -1.0,
+            1.0,
+            -1.0
+        ]  # Joint angle home position
 
 
         self.qs = self.q_home
@@ -167,19 +164,20 @@ class VrepRoArmM1Sim():
         with self._status_lock:
             res = (self.get_joint_angles(), self.get_joint_torques())
             for i in range(4):
-                res[i] = res[i] + self.q_zero[i] 
+                res[i] = res[i] - self.q_zero[i] 
         return res
 
     @vrep
     def set_joint_targets(self, qs, do_offsetcompensation=True):
+
         for i in range(4):
             if do_offsetcompensation:
-                qt = self.q_zero[i] - qs[i]
+                qt = self.q_zero[i] + self.q_zero_fac[i]*qs[i]
             else:
                 qt = qs[i]
             self.vrep_sim.setJointTargetPosition(self.vrep_jointids_arm[i], qt*math.pi/180)
         if len(qs)>4:
-            q_gripper = qs[4]*math.pi/180
+            q_gripper = (qs[4])*math.pi/180
             self.vrep_sim.setJointTargetPosition(self.vrep_jointids_gripper[0], -q_gripper)
             self.vrep_sim.setJointTargetPosition(self.vrep_jointids_gripper[1], q_gripper)
 

@@ -3,7 +3,7 @@ import math
 
 import numpy as np
 
-from .. import config
+from ..config import config
 
 try:
     from scipy import signal
