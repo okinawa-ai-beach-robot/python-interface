@@ -159,6 +159,7 @@ class RoArmM1(threading.Thread):
             if not strdata.startswith(b"{"):
                 # Ignore information messages
                 # Only interpred json data {....}
+                print("msg:", strdata.decode())
                 continue
             try:
                 data = json.loads(strdata)
@@ -292,7 +293,7 @@ class RoArmM1(threading.Thread):
             self.set_joint_targets(qs[t])
             wtime = 0
             ts_now = time.time()
-            if ts == None:
+            if ts is None:
                 # fixed replay frequency
                 wtime = (1.0 / freq) - (ts_now - ts_start)
                 ts_start = ts_now
