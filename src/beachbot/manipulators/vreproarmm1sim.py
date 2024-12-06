@@ -134,6 +134,20 @@ class VrepRoArmM1Sim():
         # target relative to home position:
         qs = self.inv_kin([t+o for  t,o in zip(pos_target, self.cart_home)], tool_angle+self.cart_gripper_angle_home)
 
+        # Related hardware control code:
+        # jsonPosCtrl[0] = (int)(angleGenOut(STDirection[0]*jsonCmdReceive["P1"].as<float>()) + 0.5);
+        # jsonPosCtrl[1] = (int)(angleGenOut(STDirection[1]*jsonCmdReceive["P2"].as<float>()+15)*3 + 0.5);
+        # jsonPosCtrl[2] = (int)(angleGenOut(STDirection[2]*jsonCmdReceive["P3"].as<float>()+180) + 0.5);
+        # jsonPosCtrl[3] = (int)(angleGenOut(STDirection[3]*jsonCmdReceive["P4"].as<float>()+180) + 0.5);
+        # jsonPosCtrl[4] = (int)(angleGenOut(STDirection[4]*jsonCmdReceive["P5"].as<float>()) + 0.5);
+        
+        #   STPos[0] = (int)(angleGenOut(STDirection[0]*InfoBuffer[angle_1]) + 0.5);
+        #   STPos[1] = (int)(angleGenOut(STDirection[1]*InfoBuffer[angle_2]+15)*3 + 0.5);
+        #   STPos[2] = (int)(angleGenOut(STDirection[2]*InfoBuffer[angle_3]+180)  + 0.5);
+        #   STPos[3] = (int)(angleGenOut(STDirection[3]*InfoBuffer[angle_4]+180)  + 0.5);
+        #   //st.SyncWritePosEx(STID, 4, STPos, STSpd, STAc);
+
+
 
         test2 = self.fkin(qs)
         print([t+o for  t,o in zip(pos_target, self.cart_home)], qs, test2)
