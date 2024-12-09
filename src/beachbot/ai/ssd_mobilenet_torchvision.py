@@ -1,16 +1,12 @@
 from beachbot.config import logger
 from .debrisdetector import DerbrisDetector
 import torch
-
-try:
-    import torchvision
-
-    import numpy as np
-
-    import os
-    from os import listdir
-    from os.path import isfile, join
-    import yaml
+import numpy as np
+import os
+from os import listdir
+from os.path import isfile, join
+import yaml
+import torchvision
 
     class SSDMobileNetTorchvision(DerbrisDetector):
         _description = """
@@ -104,7 +100,3 @@ try:
 
     DerbrisDetector.add_model("SSDMobilenet_Torchvision", SSDMobileNetTorchvision)
 
-except ModuleNotFoundError as ex:
-    logger.error(
-        "torchvision not installed or not available! SSDMobileNetTorchvision not available!"
-    )
