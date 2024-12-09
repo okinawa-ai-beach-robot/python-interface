@@ -97,7 +97,8 @@ def joystick_end():
 
 def sys_shutdown():
     print("Bye bye ...")
-    beachbot.utils.shutdown()
+    print("TODO hardcoded password!!")
+    os.system("echo beachbot | sudo -S poweroff")
 
 
 def change_media(file):
