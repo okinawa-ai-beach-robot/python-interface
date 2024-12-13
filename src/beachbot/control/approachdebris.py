@@ -10,6 +10,11 @@ class ApproachDebris(RobotController):
 
         self.ctrl = PIDController(setpoint_x=0.5, setpoint_y=0.25, kp=0.1)
 
+    
+    def set_property(self, prop_id, prop_value):
+        raise NotImplementedError()
+
+
     def update(self, robot: RobotInterface, detections: List[BoxDef]=None, debug=False):
         trash_to_follow : BoxDef = None
 

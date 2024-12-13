@@ -17,4 +17,5 @@ class RobotController:
 
     def update(self, robot: RobotInterface, detections: List[BoxDef] = None):
         raise NotImplementedError()
+    
 

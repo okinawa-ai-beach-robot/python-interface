@@ -9,16 +9,19 @@ class BlobDetectorOpenCV(DebrisDetector):
     BlobDetectorOpenCV implementation of simple blob detector.
     """
 
-    def __init__(self, model_file=None, use_accel=True) -> None:
+    def __init__(self, model_file=None, use_accel=True, minArea = 10, maxArea = 200000) -> None:
         params = cv2.SimpleBlobDetector_Params()
         params.filterByCircularity = False
         params.filterByConvexity = False
         params.filterByInertia = False
 
         params.filterByArea = True
-        params.minArea = 10
-        params.maxArea = 200000
+        params.minArea = minArea
+        params.maxArea = maxArea
         params.filterByColor = False
+
+        self.lower_blue = np.array([60, 60, 60])
+        self.upper_blue = np.array([180, 255, 255]) 
         #params.minThreshold = 10
         #params.thresholdStep = 1
         # params.blobColor = 255
@@ -33,6 +36,7 @@ class BlobDetectorOpenCV(DebrisDetector):
                         "others_traverable",
                         "trash_easy",
                         "trash_hard",]
+    
 
 
 
@@ -51,10 +55,9 @@ class BlobDetectorOpenCV(DebrisDetector):
         if debug:
             cv2.imwrite("hsv.png", hsv_img)
 
-        lower_blue = np.array([60, 60, 60])
-        upper_blue = np.array([180, 255, 255]) 
 
-        mask_blue = cv2.inRange(hsv_img, lower_blue, upper_blue)
+
+        mask_blue = cv2.inRange(hsv_img, self.lower_blue, self.upper_blue)
         mask_blue = cv2.erode(mask_blue, None, iterations=0)
         mask_blue = cv2.dilate(mask_blue, None, iterations=0)
         s_img = cv2.bitwise_and(s_img,s_img,mask = mask_blue)
@@ -67,7 +70,7 @@ class BlobDetectorOpenCV(DebrisDetector):
         result_class_ids=[]
         result_confidences=[]
         for p in keyp:
-            if debug:
+            if debug or True:
                 print("Blob detector output:", p.pt, p.size, row, col)
 
             width = (p.size)/col

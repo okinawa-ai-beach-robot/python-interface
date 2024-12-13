@@ -115,9 +115,17 @@ def toggle_detection(doit):
     video_image.content = ""
     print("Detection:", doit)
     if doit:
-        detector = BlobDetectorOpenCV()
+        detector = BlobDetectorOpenCV(minArea=blob_mi.value, maxArea=blob_ma.value)
+        detector.lower_blue=np.array([int(blob_hmi.value), int(blob_smi.value), int(blob_vmi.value)])
+        detector.upper_blue=np.array([int(blob_hma.value), int(blob_sma.value), int(blob_vma.value)])
+        print(blob_mi.value, blob_ma.value)
+        print(detector.lower_blue)
+        print(detector.upper_blue)
     else:
         detector=None
+
+def blobcfg():
+    toggle_detection(True)
 
 
 controller = None
@@ -280,6 +288,7 @@ with tab_panel:
                     one_ctrl = ui.tab("Locomotion")
                     two_ctrl = ui.tab("Arm")
                     three_ctrl = ui.tab("Arm Cart")
+                    four_ctrl = ui.tab("Settings")
                 tab_panel_ctrl = ui.tab_panels(tabs_ctrl, value=one_ctrl).classes("w-full")
                 with tab_panel_ctrl:
                     with ui.tab_panel(one_ctrl):
@@ -322,6 +331,31 @@ with tab_panel:
                         with ui.row().classes("w-full justify-between no-wrap"):
                             ui.label("r:")
                             cart_r_slider = ui.slider(min=-45, max=45, step=1.0, value=0.0, on_change=lambda x: arm_action_cartesian()).props('label')
+                    with ui.tab_panel(four_ctrl):
+                        with ui.row().classes("w-full justify-between no-wrap"):
+                            ui.label("H min:")
+                            blob_hmi = ui.slider(min=0, max=255, step=1, value=60, on_change=lambda x: blobcfg())
+                        with ui.row().classes("w-full justify-between no-wrap"):
+                            ui.label("H max:")
+                            blob_hma = ui.slider(min=0, max=255, step=1, value=180, on_change=lambda x: blobcfg())
+                        with ui.row().classes("w-full justify-between no-wrap"):
+                            ui.label("S min:")
+                            blob_smi = ui.slider(min=0, max=255, step=1, value=60, on_change=lambda x: blobcfg())
+                        with ui.row().classes("w-full justify-between no-wrap"):
+                            ui.label("S max:")
+                            blob_sma = ui.slider(min=0, max=255, step=1, value=255, on_change=lambda x: blobcfg())
+                        with ui.row().classes("w-full justify-between no-wrap"):
+                            ui.label("V min:")
+                            blob_vmi = ui.slider(min=0, max=255, step=1, value=60, on_change=lambda x: blobcfg())
+                        with ui.row().classes("w-full justify-between no-wrap"):
+                            ui.label("V max:")
+                            blob_vma = ui.slider(min=0, max=255, step=1, value=255, on_change=lambda x: blobcfg())
+                        with ui.row().classes("w-full justify-between no-wrap"):
+                            ui.label("min size:")
+                            blob_mi = ui.slider(min=0, max=300000, step=100, value=1000, on_change=lambda x: blobcfg())
+                        with ui.row().classes("w-full justify-between no-wrap"):
+                            ui.label("max size:")
+                            blob_ma = ui.slider(min=0, max=300000, step=100, value=200000, on_change=lambda x: blobcfg())
             with splitter.after:
                 video_image = ui.interactive_image().classes("w-full h-full")
     with ui.tab_panel(two):
