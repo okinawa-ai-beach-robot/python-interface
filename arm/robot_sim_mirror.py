@@ -8,7 +8,7 @@ from beachbot.robot.vreprobotsimv1 import VrepRobotSimV1
 
 arm1 = beachbot.manipulators.RoArmM1()
 
-robot = VrepRobotSimV1()
+robot = VrepRobotSimV1(scenefile="scene.ttt")
 simarm1 = robot.arm
 
 

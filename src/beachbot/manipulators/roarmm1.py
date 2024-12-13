@@ -185,6 +185,18 @@ class RoArmM1(threading.Thread):
         with self._status_lock:
             res = self.qs.copy()
         return res
+    
+    def set_max_torque(self, jointnr, maxvalue):
+        if jointnr>0 and jointnr<6 and maxvalue>=0 and maxvalue<=1000:
+            data = json.dumps(
+                {
+                    "T": 100,
+                    f"Q{jointnr}": maxvalue
+                }
+            )
+            self.write_io(data)
+        else:
+            raise ValueError("joint number range is 1 to 5 and value range is percent x10 (0-1000)")
 
     def get_joint_torques(self):
         with self._status_lock:
@@ -206,11 +218,11 @@ class RoArmM1(threading.Thread):
                 "P3": qs[2],
                 "P4": qs[3],
                 "P5": qs[4],
-                "S1": 0,
-                "S2": 0,
-                "S3": 0,
-                "S4": 0,
-                "S5": 0,
+                "S1": 400,
+                "S2": 1200,
+                "S3": 400,
+                "S4": 400,
+                "S5": 400,
                 "A1": 60,
                 "A2": 60,
                 "A3": 60,
@@ -228,6 +240,7 @@ class RoArmM1(threading.Thread):
         jpos = self.gripper_open + (self.gripper_close - self.gripper_open) * pos
         qt = self.get_joint_angles()
         qt[-1] = jpos
+        print("set gripper", jpos)
         self.set_joint_targets(qt)
 
     def set_joints_enabled(self, is_enabled):

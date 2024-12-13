@@ -56,6 +56,7 @@ class VrepRoArmM1Sim():
         self.vrep_sim = vrep_sim
      
         self.is_connected = False
+        #self._status_lock = threading.Lock()
 
         self.basepath = config.BEACHBOT_HOME
 
@@ -167,6 +168,8 @@ class VrepRoArmM1Sim():
     def get_joint_angles(self):
         res = [self.vrep_sim.getJointPosition(jid)*180/math.pi for jid in self.vrep_jointids_arm]
         res += [self.vrep_sim.getJointPosition(self.vrep_jointids_gripper[0])*180/math.pi]
+        for i in range(4):
+            res[i] = res[i] - self.q_zero[i] 
         return res
 
     @vrep
@@ -175,13 +178,12 @@ class VrepRoArmM1Sim():
         res += [self.vrep_sim.getJointForce(self.vrep_jointids_gripper[0])]
         return res
 
-    @vrep
+    
     def get_joint_state(self):
-        with self._status_lock:
-            res = (self.get_joint_angles(), self.get_joint_torques())
-            for i in range(4):
-                res[i] = res[i] - self.q_zero[i] 
+        #with self._status_lock:
+        res = (self.get_joint_angles(), self.get_joint_torques())
         return res
+
 
     @vrep
     def set_joint_targets(self, qs, do_offsetcompensation=True):
