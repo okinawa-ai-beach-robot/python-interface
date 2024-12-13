@@ -17,7 +17,7 @@ class BlobDetectorOpenCV(DebrisDetector):
 
         params.filterByArea = True
         params.minArea = 10
-        params.maxArea = 100000
+        params.maxArea = 200000
         params.filterByColor = False
         #params.minThreshold = 10
         #params.thresholdStep = 1

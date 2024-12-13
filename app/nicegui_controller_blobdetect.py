@@ -17,7 +17,7 @@ import signal
 #import beachbot.sensors
 import beachbot
 from beachbot import logger
-from beachbot.robot import RobotInterface, VrepRobotSimV1
+from beachbot.robot import RobotInterface, VrepRobotSimV1, JetsonRobotV1
 from beachbot.ai import BlobDetectorOpenCV
 from beachbot.control import ApproachDebrisController, BoxDef
 
@@ -32,10 +32,24 @@ from nicegui import Client, app, core, run, ui
 from nicegui import app, ui
 
 
+
+from argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument("--sim", default=False, action="store_true", help="Execute in simulation instead of on real robot")
+args = parser.parse_args()
+
+
+
+
 tab_names = ["Control", "Recordings"]
 
 
-robot = VrepRobotSimV1()
+if args.sim:
+    robot = VrepRobotSimV1(scene="scene3.ttt")
+else:
+    robot = JetsonRobotV1()
+    
 cam1 = robot.cameradevices[RobotInterface.CAMERATYPE.FRONT]
 # retrieve information on video stream:
 capture_width, capture_height = cam1.get_size()

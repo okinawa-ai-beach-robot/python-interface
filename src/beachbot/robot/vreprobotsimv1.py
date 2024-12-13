@@ -7,14 +7,14 @@ from ..utils.vrepsimulation import vrep
 from coppeliasim_zmqremoteapi_client import *
 
 class VrepRobotSimV1(RobotInterface):
-    def __init__(self):
+    def __init__(self, scene=None):
         super().__init__()
 
         self._base_folder_sim = str(config.BEACHBOT_HOME) + os.sep + "Simulation"
 
 
         # Simulator Setup:
-        self._vrep_init()
+        self._vrep_init(scene)
 
         # Camera Setup:
         self.cameradevices[RobotInterface.CAMERATYPE.FRONT] = VrepCameraSim(self._vrep_sim, "cam_front")
@@ -29,12 +29,15 @@ class VrepRobotSimV1(RobotInterface):
         self.arm = VrepRoArmM1Sim(self._vrep_sim, gripper_limits=[50,60])
 
     @vrep
-    def _vrep_init(self):
+    def _vrep_init(self, scene):
         self._vrep_handle = RemoteAPIClient(verbose=False)
         self._vrep_sim = self._vrep_handle.require('sim')
         self._vrep_sim.stopSimulation(True)
 
-        self._vrep_sim.loadScene(self._base_folder_sim+os.sep+"scene.ttt")
+        if scene is None:
+            scene = "scene.ttt"
+
+        self._vrep_sim.loadScene(self._base_folder_sim+os.sep+scene)
         self._vrep_sim.startSimulation()
 
     def stop(self):
