@@ -103,17 +103,20 @@ class RoArmM1(threading.Thread):
             self.gripper_open,
         ]  # Joint angle home position
         self.qs = self.q_home
-
+        
+        self.device=None
         if serial_port is not None:
-
+            
+            self.is_connected=False
             try:
                 self.device = serial.Serial(
                     serial_port, timeout=0, baudrate=115200
                 )  # open serial port
                 # self.device.open()
+                self.is_connected = self.device.isOpen()
             except Exception as e:
                 print("error open serial port: " + str(e))
-            self.is_connected = self.device.isOpen()
+            
 
         self._write_lock = threading.Lock()
         self._status_lock = threading.Lock()

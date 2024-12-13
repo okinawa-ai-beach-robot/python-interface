@@ -1,6 +1,8 @@
 import os
-from ..sensors import VrepCameraSim
-from ..manipulators import DifferentialDrive, VrepMotorSim, VrepRoArmM1Sim
+from ..sensors.vrepcamerasim import VrepCameraSim
+from ..manipulators.drive import DifferentialDrive
+from ..manipulators.vrepmotorsim import VrepMotorSim
+from ..manipulators.vreproarmm1sim import VrepRoArmM1Sim
 from .robotinterface import RobotInterface
 from ..config import config
 from ..utils.vrepsimulation import vrep

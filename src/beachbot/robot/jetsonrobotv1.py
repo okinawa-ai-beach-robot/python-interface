@@ -1,5 +1,8 @@
-from ..sensors import JetsonCsiCameraOpenCV, UsbCameraOpenCV
-from ..manipulators import DifferentialDrive, JetsonMotor, RoArmM1
+from ..sensors.jetsoncsicameraopencv import JetsonCsiCameraOpenCV
+from ..sensors.usbcameraopencv import UsbCameraOpenCV
+from ..manipulators.drive import DifferentialDrive
+from ..manipulators.jetsonmotor import JetsonMotor
+from ..manipulators.roarmm1 import RoArmM1
 from .robotinterface import RobotInterface
 
 try:
@@ -15,7 +18,11 @@ class JetsonRobotV1(RobotInterface):
         super().__init__()
         # Camera Setup:
         self.cameradevices[RobotInterface.CAMERATYPE.FRONT] = JetsonCsiCameraOpenCV()
-        self.cameradevices[RobotInterface.CAMERATYPE.GRIPPER] = UsbCameraOpenCV()
+        try:
+            usbcam = UsbCameraOpenCV()
+            self.cameradevices[RobotInterface.CAMERATYPE.GRIPPER] = usbcam
+        except Exception:
+            pass
 
         # Motor Hardware Config:
         pwm_pins = [32, 33]

@@ -55,3 +55,14 @@ The pip-version does not support the jetson camera, thus, we have to uninstall a
 ```
 pip uninstall opencv-python
 ```
+
+Errors such as:
+```
+(python:7658): GStreamer-WARNING **: 16:29:41.143: Failed to load plugin '/usr/lib/aarch64-linux-gnu/gstreamer-1.0/libgstnvarguscamerasrc.so': /lib/aarch64-linux-gnu/libGLdispatch.so.0: cannot allocate memory in static TLS block
+
+(python:7658): GStreamer-WARNING **: 16:29:41.146: Failed to load plugin '/usr/lib/aarch64-linux-gnu/gstreamer-1.0/libgstnvvidconv.so': /lib/aarch64-linux-gnu/libGLdispatch.so.0: cannot allocate memory in static TLS block
+```
+can be avoided by prefixing the command such as, e.g.,
+```
+LD_PRELOAD=/lib/aarch64-linux-gnu/libGLdispatch.so python nicegui_controller.py
+```

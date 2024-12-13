@@ -1,5 +1,6 @@
+from typing import List
 from .robotcontroller import RobotController, BoxDef
-from ..robot import RobotInterface
+from ..robot.robotinterface import RobotInterface
 from ..utils.controllercollection import PIDController
 
 
@@ -9,7 +10,7 @@ class ApproachDebris(RobotController):
 
         self.ctrl = PIDController(setpoint_x=0.5, setpoint_y=0.25, kp=0.1)
 
-    def update(self, robot: RobotInterface, detections: list[BoxDef]=None, debug=False):
+    def update(self, robot: RobotInterface, detections: List[BoxDef]=None, debug=False):
         trash_to_follow : BoxDef = None
 
         if len(detections)>0:

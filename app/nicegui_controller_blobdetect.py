@@ -16,12 +16,16 @@ import signal
 #from beachbot.manipulators import Motor, DifferentialDrive
 #import beachbot.sensors
 import beachbot
-from beachbot import logger
-from beachbot.robot import RobotInterface, VrepRobotSimV1, JetsonRobotV1
-from beachbot.ai import BlobDetectorOpenCV
-from beachbot.control import ApproachDebrisController, BoxDef
+from beachbot.config import logger
+from beachbot.robot.robotinterface import RobotInterface
+from beachbot.robot.vreprobotsimv1 import VrepRobotSimV1
+from beachbot.robot.jetsonrobotv1 import JetsonRobotV1
+from beachbot.ai.blobdetectoropencv import BlobDetectorOpenCV
+from beachbot.control.robotcontroller import BoxDef
+from beachbot.control.approachdebris import ApproachDebris as ApproachDebrisController
 
 
+from beachbot.utils.videowriteropencv import VideoWriterOpenCV
 
 import time
 
@@ -67,7 +71,7 @@ video_is_recording = False
 sleep_time = 0.1
 
 
-media = Path(beachbot.utils.VideoWriterOpenCV.get_base_path())
+media = Path(VideoWriterOpenCV.get_base_path())
 app.add_media_files("/my_videos", media)
 
 # image placeholder in case no video device available:
@@ -133,7 +137,7 @@ def update_kp(new_kp):
 def toggle_recoding(doit):
     global video_is_recording, videowriter
     if doit and not video_is_recording:
-        videowriter = beachbot.utils.VideoWriterOpenCV(
+        videowriter = VideoWriterOpenCV(
             None, fps=10, capture_width=capture_width, capture_height=capture_height
         )
         # initiate threaded recording into video file
@@ -324,7 +328,7 @@ with tab_panel:
         with ui.dropdown_button("Select File...", auto_close=True) as selector:
             pass
         ui.label("Media Viewer:")
-        ui.label(beachbot.utils.VideoWriterOpenCV.get_base_path())
+        ui.label(VideoWriterOpenCV.get_base_path())
         uivideo = ui.video("src")
 
 reload_files()

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from ..robot import RobotInterface
+from typing import List
+from ..robot.robotinterface import RobotInterface
 
 @dataclass
 class BoxDef:
@@ -14,6 +15,6 @@ class RobotController:
     def __init__(self):
         pass
 
-    def update(self, robot: RobotInterface, detections: list[BoxDef] = None):
+    def update(self, robot: RobotInterface, detections: List[BoxDef] = None):
         raise NotImplementedError()
 

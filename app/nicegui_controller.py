@@ -11,10 +11,11 @@ import numpy as np
 
 import signal
 import beachbot
-from beachbot import logger
+from beachbot.config import logger
 from beachbot.robot import RobotInterface, JetsonRobotV1
 import time
 
+from beachbot.utils.videowriteropencv import VideoWriterOpenCV
 
 from fastapi import Response
 from nicegui import Client, app, core, run, ui

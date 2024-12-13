@@ -44,8 +44,9 @@ class UsbCameraOpenCV(threading.Thread):
             self._stopped = False
             super().start()
         else:
-            logger.error(f"Could not open camera, device available, resolution and framerate supported? check with v4l2-ctl -d /dev/video{dev_id} --list-formats-ext")
-            print()
+            logger.error(f"Could not open camera, device available, resolution and framerate supported? check with v4l2-ctl -d /dev/video{self._dev_id} --list-formats-ext")
+            raise Exception(f"Could not open /dev/video{self._dev_id}")
+
 
     @staticmethod
     def list_cameras():
