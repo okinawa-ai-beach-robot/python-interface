@@ -139,12 +139,16 @@ class VrepRoArmM1Sim():
         self.vrep_base_id = self.vrep_sim.getObject("/arm_mount")
         self.vrep_gripper_id = self.vrep_sim.getObject("/Tip")
         # todo optional, wrap with try catch, or does it return None? ->
-        self.vrep_path_script = self.vrep_sim.getObject("./tipctrl")
+        try:
+            self.vrep_path_script = self.vrep_sim.getObject("./tipctrl")
+        except:
+            self.vrep_path_script=None
         self.vrep_robot_script = self.vrep_sim.getObject("./robotctrl")
 
     @vrep
     def set_target_path_pos(self, percent=0.5, offset=[0,0,0]):
-        self.vrep_sim.callScriptFunction("setPathPosition",self.vrep_path_script,percent, offset)
+        if self.vrep_path_script is not None:
+            self.vrep_sim.callScriptFunction("setPathPosition",self.vrep_path_script,percent, offset)
 
 
     def set_cart_pos(self, pos_target, tool_angle):

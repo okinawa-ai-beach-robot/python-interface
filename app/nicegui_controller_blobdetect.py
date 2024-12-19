@@ -50,7 +50,7 @@ tab_names = ["Control", "Recordings"]
 
 
 if args.sim:
-    robot = VrepRobotSimV1(scene="scene3.ttt")
+    robot = VrepRobotSimV1(scene="roarm_m1_locomotion_3finger.ttt")
 else:
     robot = JetsonRobotV1()
     
