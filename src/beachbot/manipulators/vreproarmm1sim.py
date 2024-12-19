@@ -124,13 +124,29 @@ class VrepRoArmM1Sim():
         self.qs = self.q_home
 
         self.vrep_jointnames_arm=['base_to_L1', 'L1_to_L2', 'L2_to_L3', 'L3_to_L4', ]
-        self.vrep_jointnames_gripper=['L4_to_L5_1_A', 'L4_to_L5_1_B' ]
+        #self.vrep_jointnames_gripper=['L4_to_L5_1_A', 'L4_to_L5_1_B' ]
 
+        # Important, mark interacitons with sim via function deccorator '@vrep' to execute them in the same thread that established the simulator connection
+        self.init_sim()
+
+
+
+    @vrep
+    def init_sim(self):
         self.vrep_jointids_arm = [self.vrep_sim.getObject("/"+jn) for jn in self.vrep_jointnames_arm]
-        self.vrep_jointids_gripper = [self.vrep_sim.getObject("/"+jn) for jn in self.vrep_jointnames_gripper]
+        #self.vrep_jointids_gripper = [self.vrep_sim.getObject("/"+jn) for jn in self.vrep_jointnames_gripper]
 
-        self.vrep_base_id = self.vrep_sim.getObject("/top_mount")
+        self.vrep_base_id = self.vrep_sim.getObject("/arm_mount")
         self.vrep_gripper_id = self.vrep_sim.getObject("/Tip")
+        # todo optional, wrap with try catch, or does it return None? ->
+        self.vrep_path_script = self.vrep_sim.getObject("./tipctrl")
+        self.vrep_robot_script = self.vrep_sim.getObject("./robotctrl")
+
+    @vrep
+    def set_target_path_pos(self, percent=0.5, offset=[0,0,0]):
+        self.vrep_sim.callScriptFunction("setPathPosition",self.vrep_path_script,percent, offset)
+
+
     def set_cart_pos(self, pos_target, tool_angle):
         # target relative to home position:
         qs = self.inv_kin([t+o for  t,o in zip(pos_target, self.cart_home)], tool_angle+self.cart_gripper_angle_home)
@@ -163,11 +179,18 @@ class VrepRoArmM1Sim():
         self.set_joint_targets(qs,do_offsetcompensation=True)
 
 
+
+    def _get_gripper(self):
+        q,t = self.vrep_sim.callScriptFunction("get_gripper",self.vrep_robot_script)
+        print("gripper is", q, t)
+        return q,t
+
       
     @vrep
     def get_joint_angles(self):
         res = [self.vrep_sim.getJointPosition(jid)*180/math.pi for jid in self.vrep_jointids_arm]
-        res += [self.vrep_sim.getJointPosition(self.vrep_jointids_gripper[0])*180/math.pi]
+        q,t =  self._get_gripper()
+        res += [q*180/math.pi]
         for i in range(4):
             res[i] = res[i] - self.q_zero[i] 
         return res
@@ -175,7 +198,8 @@ class VrepRoArmM1Sim():
     @vrep
     def get_joint_torques(self):
         res = [self.vrep_sim.getJointForce(jid) for jid in self.vrep_jointids_arm]
-        res += [self.vrep_sim.getJointForce(self.vrep_jointids_gripper[0])]
+        q,t =  self._get_gripper()
+        res += [t]
         return res
 
     
