@@ -12,6 +12,7 @@ class VrepRobotSimV1(RobotInterface):
     def __init__(self, scene=None):
         super().__init__()
 
+        # Simulation scenes are expected to be in ${BEACHBOT_HOME}/Simulation/xxx.ttt:
         self._base_folder_sim = str(config.BEACHBOT_HOME) + os.sep + "Simulation"
 
 
@@ -26,8 +27,8 @@ class VrepRobotSimV1(RobotInterface):
             pass
 
         # Motor Controller Setup:
-        motor_left = VrepMotorSim(self._vrep_sim, "motor_left")
-        motor_right = VrepMotorSim(self._vrep_sim, "motor_right")
+        motor_left = VrepMotorSim("motor_left", self._vrep_sim)
+        motor_right = VrepMotorSim("motor_right", self._vrep_sim)
         self.platform = DifferentialDrive(motor_left, motor_right)
 
         # Init Robot arm, gripper limits [q_open, q_close] must be adjusted to gripper hardware!
@@ -35,13 +36,16 @@ class VrepRobotSimV1(RobotInterface):
 
     @vrep
     def _vrep_init(self, scene):
+        # Open connection to simulator
         self._vrep_handle = RemoteAPIClient(verbose=False)
         self._vrep_sim = self._vrep_handle.require('sim')
+        # Stop any running simulation before proceeding
         self._vrep_sim.stopSimulation(True)
 
         if scene is None:
-            scene = "scene.ttt"
+            scene = "roarm_m1_locomotion_3finger.ttt"
 
+        # Load and run simulation scene
         self._vrep_sim.loadScene(self._base_folder_sim+os.sep+scene)
         self._vrep_sim.startSimulation()
 
