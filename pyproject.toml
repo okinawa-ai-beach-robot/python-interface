@@ -43,6 +43,7 @@ dependencies = [
     "yolov5>=7.0.14",
     "Jetson.GPIO>=2.1.6",
     "coppeliasim-zmqremoteapi-client>=2.0.4"
+    "PyGithub",
 ]
 
 requires-python = ">=3.8"
