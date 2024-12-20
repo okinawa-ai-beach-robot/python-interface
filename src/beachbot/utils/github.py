@@ -1,7 +1,8 @@
 import os
 from github import Github
+from pathlib import Path
 
-def download(local_file_path, github_repo, github_path, branch_name, token=None):
+def download(local_file_path: Path, github_repo: str, github_path: str, branch_name: str, token: str=None):
     """
     Checks if a file exists locally or in a specific branch of a GitHub repository and downloads it if necessary.
     
